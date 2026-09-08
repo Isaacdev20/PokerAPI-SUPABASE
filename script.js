@@ -552,6 +552,31 @@ document.addEventListener('DOMContentLoaded', () => {
       this.updateUI();
 
     }
+    //Funcao para salvar o saldo de todos os jogadores(vc e os bots) no supabase
+    async salvarSaldosNoSupabase() {
+      if (!supabase) return;
+      console.log('salvando saldos no supabase...');
+      try {
+        //cria uma lista de atualizações para cada jogador que tem ID no banco
+        const atualizacoes = this.players.map(p => {
+          if (!p.dbId) return Promise.resolve();
+          return supabase
+            .from('player_profiles')
+            .update({ chips: p.chips })
+            //coluna que será atualizada
+            .eq('id', p.dbId);
+          //onde o ID for igual ID do jogador
+        });
+        //executa todas as atualizacoes juntas
+        await Promise.all(atualizacoes);
+        console.log('✅ Supabase: Saldos atualizados com sucesso!');
+        this.addLog('💾 Saldos salvos no Supabase.');
+      } catch (err) {
+        console.error('Erro ao salvar no Supabase', err);
+      }
+
+    }
+
 
     // Vincula os cliques dos botões aos respectivos métodos
     bindEvents() {
@@ -1129,6 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Mostra o botão para iniciar a próxima mão
       this.dom.btnNextHand.style.display = 'flex';
       this.updateUI();
+      this.salvarSaldosNoSupabase();
     }
 
     // Entrega o pote quando todos os outros deram fold
@@ -1142,6 +1168,7 @@ document.addEventListener('DOMContentLoaded', () => {
       SoundSystem.playWin();
       this.dom.btnNextHand.style.display = 'flex';
       this.updateUI();
+      this.salvarSaldosNoSupabase();
     }
 
     /* ------------------------------------------------------------------------

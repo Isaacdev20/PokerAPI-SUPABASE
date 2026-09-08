@@ -1,0 +1,7 @@
+a partida n inicia quando eu abro o index.html , tenho que clicar no botão reiniciar para apararecer o botão nova mao .
+
+as cartas e os ícones com o nome e saldo estão um em cima do outro
+a tela n fica cheia tenho que rolar para baixo para ficar toda cheia 
+quero tirar a box de histórico da mesa
+quando dou all-in o jogo trava , 
+nao quero que as cartas fiquem por baixo dos perfis
