@@ -1,0 +1,1055 @@
+/* ==========================================================================
+   TEXAS HOLD'EM POKER - ESTILOS VISUAIS (style.css)
+   Desenvolvido para criar uma atmosfera de cassino de luxo com feltro verde,
+   detalhes dourados, cartas nítidas e animações suaves.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. VARIÁVEIS CSS (DESIGN SYSTEM): Cores, Fontes e Sombras
+   Centralizar valores aqui facilita qualquer alteração no tema visual.
+   -------------------------------------------------------------------------- */
+:root {
+  /* Paleta de Cores do Cassino */
+  --bg-dark: #070e0b;
+  --table-felt-edge: #0a3321;
+  --table-felt-center: #0d5c38;
+  --table-rim-outer: #2a1810;
+  --table-rim-inner: #45281a;
+  
+  /* Cores de Destaque e Metais */
+  --gold-primary: #d4af37;
+  --gold-light: #f3e5ab;
+  --gold-glow: rgba(212, 175, 55, 0.4);
+  
+  /* Cores de Cartas e Naipes */
+  --card-bg: #ffffff;
+  --card-suit-red: #d32f2f;
+  --card-suit-black: #1e2022;
+  
+  /* Cores de Ações / Status */
+  --action-fold: #c0392b;
+  --action-check: #2980b9;
+  --action-raise: #27ae60;
+  --action-allin: #8e44ad;
+  
+  /* Tipografia */
+  --font-serif: 'Cinzel', serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Transições e Sombras */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-card: 0 6px 16px rgba(0, 0, 0, 0.45);
+  --shadow-seat: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   2. RESET GERAL E CONFIGURAÇÃO DA PÁGINA
+   Remove margens padrões e configura a caixa de dimensionamento (box-sizing).
+   -------------------------------------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: radial-gradient(circle at 50% 30%, #13241c 0%, var(--bg-dark) 100%);
+  color: #ecf0f1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  user-select: none; /* Evita seleção acidental de texto durante os cliques */
+}
+
+/* --------------------------------------------------------------------------
+   3. BARRA SUPERIOR (HEADER)
+   Exibe a marca, fase atual e botões utilitários.
+   -------------------------------------------------------------------------- */
+.app-header {
+  height: 64px;
+  background: rgba(10, 16, 13, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 100;
+  position: relative;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  color: var(--gold-primary);
+  font-size: 1.8rem;
+  filter: drop-shadow(0 0 8px var(--gold-glow));
+}
+
+.logo-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #fff 20%, var(--gold-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+}
+
+/* Indicador pulsante do estágio da mão */
+.round-indicator-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gold-light);
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--gold-primary);
+  box-shadow: 0 0 10px var(--gold-primary);
+  animation: pulseAnimation 1.8s infinite;
+}
+
+@keyframes pulseAnimation {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-header {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f2f6;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-fast);
+}
+
+.btn-header:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--gold-primary);
+  color: #fff;
+}
+
+.btn-restart:hover {
+  background: rgba(192, 57, 43, 0.25);
+  border-color: var(--action-fold);
+}
+
+/* --------------------------------------------------------------------------
+   4. ESTRUTURA GERAL DO CONTEÚDO (Mesa + Painel)
+   -------------------------------------------------------------------------- */
+.table-container {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  padding: 16px 20px 220px 20px; /* Espaço inferior para acomodar o dock de controles */
+  justify-content: center;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   5. A MESA DE POKER
+   Borda circular de madeira elegante com feltro de veludo verde central.
+   -------------------------------------------------------------------------- */
+.poker-table {
+  width: 100%;
+  max-width: 1020px;
+  height: 520px;
+  position: relative;
+  background: radial-gradient(ellipse at center, var(--table-rim-inner) 0%, var(--table-rim-outer) 100%);
+  border-radius: 260px; /* Formato oval de mesa de cassino */
+  padding: 22px; /* Espessura da borda acolchoada de madeira */
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.8),
+    inset 0 4px 12px rgba(255, 255, 255, 0.1),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Feltro Verde com textura e gradiente de iluminação */
+.table-felt {
+  width: 100%;
+  height: 100%;
+  border-radius: 238px;
+  background: radial-gradient(ellipse at center, var(--table-felt-center) 25%, var(--table-felt-edge) 100%);
+  position: relative;
+  box-shadow: 
+    inset 0 0 40px rgba(0, 0, 0, 0.6),
+    inset 0 0 120px rgba(0, 0, 0, 0.4);
+  overflow: visible;
+}
+
+/* Linha dourada suave demarcatória do centro da mesa */
+.table-inner-ring {
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  right: 10%;
+  bottom: 15%;
+  border: 2px dashed rgba(212, 175, 55, 0.22);
+  border-radius: 160px;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   6. ÁREA CENTRAL (Cartas Comunitárias, Pote e Avisos)
+   -------------------------------------------------------------------------- */
+.center-area {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  z-index: 10;
+}
+
+/* Pote de Fichas Acumuladas */
+.pot-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 6px 18px;
+  border-radius: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  animation: potShine 3s infinite alternate;
+}
+
+@keyframes potShine {
+  from { border-color: rgba(212, 175, 55, 0.3); }
+  to { border-color: rgba(212, 175, 55, 0.7); box-shadow: 0 0 16px rgba(212, 175, 55, 0.3); }
+}
+
+.pot-icon {
+  font-size: 1.2rem;
+}
+
+.pot-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.pot-label {
+  font-size: 0.65rem;
+  color: #bbb;
+  letter-spacing: 1px;
+}
+
+.pot-value {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+
+/* Área das 5 Cartas Comunitárias */
+.community-cards {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.card-slot {
+  width: 66px;
+  height: 94px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: rgba(0, 0, 0, 0.15);
+  transition: var(--transition-fast);
+}
+
+.slot-label {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.25);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Mensagem de estado no centro do feltro */
+.table-status-message {
+  font-size: 0.85rem;
+  color: #dfdfdf;
+  background: rgba(5, 20, 14, 0.75);
+  padding: 5px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  max-width: 440px;
+}
+
+/* --------------------------------------------------------------------------
+   7. ASSENTOS DOS JOGADORES (SEATS)
+   Posicionamento absoluto em torno da mesa oval.
+   -------------------------------------------------------------------------- */
+.seat {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 140px;
+  z-index: 20;
+  transition: transform var(--transition-normal);
+}
+
+/* Posição dos 4 assentos */
+.seat-left {
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.seat-top {
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.seat-right {
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.seat-bottom {
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Destaque visual quando for a vez do jogador agir */
+.seat.turn-active .player-avatar {
+  box-shadow: 0 0 0 3px var(--gold-primary), 0 0 20px var(--gold-primary);
+  animation: pulseTurn 1.2s infinite alternate;
+}
+
+@keyframes pulseTurn {
+  from { transform: scale(1); }
+  to { transform: scale(1.06); }
+}
+
+/* Jogador que deu Fold (Desistiu da mão) */
+.seat.folded {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+}
+
+/* Avatar do Jogador */
+.player-avatar {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(145deg, #2c3e50, #1a252f);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  box-shadow: var(--shadow-seat);
+  transition: var(--transition-fast);
+}
+
+.avatar-emoji {
+  font-size: 1.6rem;
+}
+
+/* Botão de Dealer (D) */
+.dealer-button {
+  position: absolute;
+  bottom: -4px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(135deg, #fff7a9 0%, #f1c40f 100%);
+  color: #2c3e50;
+  font-weight: 900;
+  font-size: 0.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+  border: 1px solid #ffffff;
+}
+
+/* Detalhes do Jogador (Nome e Fichas) */
+.player-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 4px 12px;
+  border-radius: 12px;
+  margin-top: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 100px;
+}
+
+.player-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f1f2f6;
+}
+
+.player-chips {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  font-family: var(--font-serif);
+}
+
+/* Cartas na mão de cada jogador */
+.player-cards {
+  display: flex;
+  gap: -14px; /* Sobreposição elegante no estilo cassino */
+  margin-top: 6px;
+  height: 94px;
+}
+
+/* Balão da aposta individual na mesa */
+.player-bet-chip {
+  position: absolute;
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  border: 1.5px solid #ffffff;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 14px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+  z-index: 25;
+  white-space: nowrap;
+}
+
+.seat-left .player-bet-chip { right: -30px; top: 30px; }
+.seat-right .player-bet-chip { left: -30px; top: 30px; }
+.seat-top .player-bet-chip { bottom: -28px; }
+.seat-bottom .player-bet-chip { top: -28px; }
+
+/* Balão de Ação do Jogador (Fold, Call, Check, Raise) */
+.player-action-bubble {
+  position: absolute;
+  top: -18px;
+  background: rgba(0, 0, 0, 0.9);
+  color: var(--gold-light);
+  border: 1px solid var(--gold-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  animation: popBubble 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  white-space: nowrap;
+  z-index: 30;
+}
+
+@keyframes popBubble {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   8. CARTAS DE BARALHO (PLAYING CARDS)
+   Estilização profissional das cartas abertas e fechadas.
+   -------------------------------------------------------------------------- */
+.card {
+  width: 66px;
+  height: 94px;
+  background-color: var(--card-bg);
+  border-radius: 7px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 5px 6px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  font-family: var(--font-sans);
+  border: 1px solid #dcdde1;
+}
+
+/* Efeito ao passar o mouse sobre as cartas do jogador */
+.seat-human .card:hover {
+  transform: translateY(-8px) scale(1.06);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.7);
+  z-index: 50;
+}
+
+/* Cores dos naipes */
+.card.suit-hearts,
+.card.suit-diamonds {
+  color: var(--card-suit-red);
+}
+
+.card.suit-spades,
+.card.suit-clubs {
+  color: var(--card-suit-black);
+}
+
+/* Canto superior da carta: Valor e Naipe */
+.card-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.card-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.card-icon {
+  font-size: 0.85rem;
+}
+
+/* Símbolo grande e elegante no centro da carta */
+.card-center-suit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.8rem;
+  opacity: 0.9;
+}
+
+/* Canto inferior invertido (180 graus) */
+.card-corner-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  transform: rotate(180deg);
+}
+
+/* Carta virada para baixo (Verso da carta com padrão de cassino) */
+.card.card-back {
+  background: 
+    repeating-linear-gradient(45deg, #1e3799, #1e3799 6px, #0c2461 6px, #0c2461 12px);
+  border: 3px solid #ffffff;
+  box-shadow: inset 0 0 0 1px #0c2461, var(--shadow-card);
+}
+
+.card.card-back::after {
+  content: "♦";
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 1.4rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Carta vencedora no Showdown (Brilho dourado) */
+.card.winning-card {
+  box-shadow: 0 0 0 3px var(--gold-primary), 0 0 25px var(--gold-primary);
+  transform: translateY(-6px);
+  animation: glowWin 1.2s infinite alternate;
+}
+
+@keyframes glowWin {
+  from { filter: drop-shadow(0 0 4px var(--gold-primary)); }
+  to { filter: drop-shadow(0 0 12px var(--gold-light)); }
+}
+
+/* --------------------------------------------------------------------------
+   9. PAINEL DE CONTROLE DO JOGADOR (DOCK INFERIOR)
+   -------------------------------------------------------------------------- */
+.player-control-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(10, 16, 13, 0.94);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 12px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 90;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.8);
+}
+
+/* Visualizador da combinação atual da mão */
+.hand-eval-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.eval-label {
+  color: #aaa;
+}
+
+.eval-result {
+  color: var(--gold-primary);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Contêiner de botões de ação */
+.actions-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 960px;
+}
+
+/* Botões de Ação Principais (Fold, Check/Call, Raise) */
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 22px;
+  cursor: pointer;
+  min-width: 120px;
+  font-family: var(--font-sans);
+  color: #ffffff;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  filter: brightness(1.15);
+}
+
+.action-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+  margin-bottom: 2px;
+}
+
+.btn-text {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.btn-subtext {
+  font-size: 0.72rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Cores específicas dos botões */
+.btn-fold {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.btn-check {
+  background: linear-gradient(135deg, #2980b9, #1f618d);
+}
+
+.btn-raise {
+  background: linear-gradient(135deg, #27ae60, #1e8449);
+}
+
+.btn-next-hand {
+  background: linear-gradient(135deg, var(--gold-primary), #b7950b);
+  color: #111;
+  font-weight: 800;
+  display: none; /* Exibido apenas no final da rodada */
+}
+
+/* Área de controle de aposta (Sliders e Atalhos) */
+.raise-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bet-presets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+}
+
+.preset-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #eee;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.preset-btn:hover:not(:disabled) {
+  background: var(--gold-primary);
+  color: #111;
+}
+
+.preset-allin {
+  background: rgba(142, 68, 173, 0.4);
+  border-color: #9b59b6;
+  color: #f5b7b1;
+}
+
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Estilização do slider de apostas */
+#bet-slider {
+  -webkit-appearance: none;
+  width: 140px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  outline: none;
+}
+
+#bet-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gold-primary);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+.bet-input-display {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
+.currency-symbol {
+  color: var(--gold-primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+#bet-input {
+  width: 70px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.9rem;
+  outline: none;
+  text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   10. PAINEL LATERAL DE HISTÓRICO (GAME LOG)
+   -------------------------------------------------------------------------- */
+.game-log-panel {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 250px;
+  max-height: 240px;
+  background: rgba(8, 14, 11, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 40;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.log-header h3 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--gold-light);
+}
+
+.btn-mini {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.btn-mini:hover {
+  color: #eee;
+}
+
+.log-content {
+  padding: 8px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.log-entry {
+  color: #c8d6e5;
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+  padding-left: 6px;
+}
+
+.log-system {
+  color: var(--gold-light);
+  font-style: italic;
+  border-left-color: var(--gold-primary);
+}
+
+.log-win {
+  color: #2ecc71;
+  font-weight: 700;
+  border-left-color: #2ecc71;
+}
+
+/* --------------------------------------------------------------------------
+   11. MODAL DE REGRAS E HIERARQUIA
+   -------------------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-dialog {
+  background: #111a15;
+  border: 1px solid var(--gold-primary);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 680px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+  animation: modalEnter 0.3s ease;
+}
+
+@keyframes modalEnter {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--gold-light);
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.6rem;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rules-section h3 {
+  color: var(--gold-primary);
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 4px;
+}
+
+.rules-section p {
+  font-size: 0.85rem;
+  color: #d1d8e0;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.hand-rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hand-rank-card {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 14px;
+  border-radius: 8px;
+  gap: 14px;
+}
+
+.rank-number {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--gold-primary);
+  min-width: 22px;
+}
+
+.rank-info {
+  flex: 1;
+}
+
+.rank-info strong {
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.rank-info p {
+  font-size: 0.75rem;
+  color: #a4b0be;
+  margin: 0;
+}
+
+.rank-sample {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   12. RESPONSIVIDADE (ADAPTAÇÃO PARA TELAS MENORES)
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .game-log-panel {
+    display: none; /* Oculta o histórico flutuante em telas pequenas */
+  }
+
+  .poker-table {
+    height: 480px;
+    border-radius: 180px;
+  }
+
+  .card, .card-slot {
+    width: 52px;
+    height: 74px;
+  }
+
+  .card-val { font-size: 0.85rem; }
+  .card-center-suit { font-size: 1.3rem; }
+}
+
+@media (max-width: 640px) {
+  .actions-wrapper {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .raise-container {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .action-btn {
+    min-width: 90px;
+    padding: 8px 12px;
+  }
+}
