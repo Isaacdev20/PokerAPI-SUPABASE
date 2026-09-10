@@ -1,0 +1,143 @@
+/*
+  ESTILOS DA ENTRADA (index.html). Não afeta a mesa em jogo.html.
+  .nome seleciona uma classe; #nome seleciona um ID; :hover trata o mouse sobre o elemento.
+  px é uma medida fixa; % acompanha o elemento pai; vh/dvh acompanham a altura da tela.
+  padding cria espaço interno, margin cria espaço externo e gap separa itens de flex/grid.
+  As cores #RRGGBBAA incluem transparência nos dois últimos dígitos quando presentes.
+*/
+:root {
+  /* Tema dos controles nativos, fonte e cores herdadas por toda a página. */
+  color-scheme: dark;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #edf2ec;
+  background: #070e0b;
+}
+
+/* Faz largura/altura incluírem padding e bordas, evitando caixas maiores que o previsto. */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh; /* Compatibilidade com navegadores que não entendem dvh. */
+  min-height: 100dvh;
+  /* Gradiente cria a iluminação verde atrás do formulário, sem arquivo de imagem. */
+  background: radial-gradient(ellipse at 50% 35%, #173c2b 0%, #0c1c14 42%, #070e0b 80%);
+}
+/* Controles usam a mesma fonte do restante da página. */
+button, input { font: inherit; }
+button { cursor: pointer; }
+/* Coluna centralizada; min-height permite rolagem caso uma tela curta exija mais espaço. */
+.login-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+}
+/* Marca acima da caixa. Ajuste font-size/letter-spacing para mudar tamanho/espaçamento. */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+  font-family: Georgia, serif;
+  font-size: 21px;
+  letter-spacing: 2px;
+}
+/* Dourado aplicado separadamente ao nome destacado e ao naipe. */
+.brand strong { color: #d4af57; }
+.brand-suit { font-size: 42px; color: #d4af57; }
+/* Caixa do login: max-width limita no desktop e width:100% permite encolher no celular. */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 36px;
+  background: linear-gradient(150deg, #16281f, #0c1711);
+  border: 1px solid #b7964945;
+  border-radius: 20px;
+  box-shadow: 0 24px 70px #0006, inset 0 1px #ffffff08; /* Sombra externa e brilho interno. */
+}
+/* Hierarquia dos textos: chamada pequena, título principal e explicação do formulário. */
+.eyebrow { color: #d4af57; font-size: 10px; font-weight: 700; letter-spacing: 2.5px; }
+h1 { margin: 12px 0 8px; font-family: Georgia, serif; font-size: 28px; font-weight: 500; }
+.intro { margin: 0 0 28px; color: #a8b5ad; font-size: 14px; line-height: 1.6; }
+/* Empilha rótulos e campos na ordem do HTML. */
+form { display: flex; flex-direction: column; }
+label { margin-bottom: 9px; font-size: 13px; font-weight: 600; }
+/* Aparência compartilhada pelos campos de usuário e senha. */
+input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #ffffff24;
+  border-radius: 9px;
+  background: #08110d;
+  color: #f2f4f0;
+  padding: 12px 14px;
+  outline: none;
+}
+/* Placeholder é a dica; :focus destaca o campo que recebe a digitação. */
+input::placeholder { color: #829188; font-size: 13px; }
+input:focus { border-color: #d4af57; box-shadow: 0 0 0 3px #d4af571a; }
+#username { margin-bottom: 22px; }
+/* position:relative serve de referência para o botão colocado dentro do campo de senha. */
+.password-field { position: relative; }
+/* Reserva espaço para que a senha não seja desenhada atrás do botão Mostrar/Ocultar. */
+.password-field input { padding-right: 82px; }
+/* Botão sobreposto somente à área reservada à direita do campo. */
+.show-password {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  color: #c5cebf;
+  padding: 0 10px;
+  font-size: 12px;
+}
+/* Ação principal dourada; gap separa o texto da seta. */
+.login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 48px;
+  margin-top: 28px;
+  border: 1px solid #e9cc80;
+  border-radius: 9px;
+  background: linear-gradient(110deg, #e0c06c, #bc933c);
+  color: #192016;
+  font-weight: 700;
+}
+/* Feedback visual de passagem do mouse; não altera a ação executada no JavaScript. */
+.login-button:hover { filter: brightness(1.1); }
+/* Cadastro fica fora da caixa, alinhado à mesma largura máxima de 420px. */
+.signup-area { width: 100%; max-width: 420px; margin-top: 24px; text-align: center; }
+.signup-area p { color: #a8b5ad; font-size: 13px; margin: 0 0 12px; }
+/* Botão secundário com borda, para diferenciá-lo da ação Entrar. */
+.signup-button {
+  min-height: 46px;
+  width: 100%;
+  border: 1px solid #b7964966;
+  border-radius: 9px;
+  background: #10201880;
+  color: #e1c477;
+  font-weight: 600;
+}
+.signup-button:hover { background: #d4af5714; border-color: #d4af57; }
+/* Mantém a navegação por Tab visível para quem usa teclado. */
+button:focus-visible { outline: 2px solid #e9cc80; outline-offset: 4px; }
+/* Área de avisos preenchida pelo JavaScript; vazia, não reserva margem. */
+.status-message { max-width: 420px; text-align: center; color: #dfc783; font-size: 13px; line-height: 1.5; }
+.status-message:empty { margin: 0; }
+/* Naipes decorativos abaixo das ações. */
+.suits { margin-top: 28px; color: #819b8c; letter-spacing: 12px; font-size: 17px; }
+.suits span { color: #b39357; }
+/* Até 480px de largura, reduz margens e tipografia; as regras anteriores continuam válidas. */
+@media (max-width: 480px) {
+  .login-page { padding: 24px 18px; }
+  .login-card { padding: 28px 22px; }
+  h1 { font-size: 26px; }
+  .brand { font-size: 18px; margin-bottom: 22px; }
+}

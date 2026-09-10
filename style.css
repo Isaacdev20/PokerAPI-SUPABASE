@@ -8,6 +8,13 @@
    1. VARIÁVEIS CSS (DESIGN SYSTEM): Cores, Fontes e Sombras
    Centralizar valores aqui facilita qualquer alteração no tema visual.
    -------------------------------------------------------------------------- */
+/* GUIA DE EDIÇÃO
+   Este CSS pertence a jogo.html; o login usa login.css.
+   .classe estiliza grupos, #id um elemento específico e var(--nome) lê uma variável.
+   As regras finais da mesa substituem parte das dimensões/posições da base antiga.
+   Para corrigir posicionamento, comece em "Mesa e controles compartilham a altura".
+   z-index define a ordem visual; aumentar esse número não resolve falta de espaço.
+*/
 :root {
   /* Paleta de Cores do Cassino */
   --bg-dark: #070e0b;
@@ -322,7 +329,7 @@ body {
 
 /* --------------------------------------------------------------------------
    7. ASSENTOS DOS JOGADORES (SEATS)
-   Posicionamento absoluto em torno da mesa oval.
+   Base dos assentos; a grade ao fim do arquivo substitui o posicionamento absoluto.
    -------------------------------------------------------------------------- */
 .seat {
   position: absolute;
@@ -813,6 +820,8 @@ body {
 
 /* --------------------------------------------------------------------------
    10. PAINEL LATERAL DE HISTÓRICO (GAME LOG)
+   Estilos antigos sem elemento correspondente: o painel foi removido de jogo.html.
+   Estes seletores não desenham um histórico por conta própria.
    -------------------------------------------------------------------------- */
 .game-log-panel {
   position: absolute;
@@ -1055,12 +1064,15 @@ body {
 }
 
 /* Mesa e controles compartilham a altura disponível, sem se sobrepor. */
+/* dvh acompanha a área visível, inclusive quando barras do navegador móvel mudam de tamanho.
+   min-height:0 permite aos filhos de flex/grid encolherem dentro da altura disponível. */
 body { height: 100dvh; min-height: 0; }
 .app-header { flex-shrink: 0; }
 .table-container {
   min-height: 0;
   padding: 10px;
   display: grid;
+  /* Primeira linha recebe o espaço restante; segunda mede a altura real dos controles. */
   grid-template-rows: minmax(0, 1fr) auto;
   justify-items: center;
   gap: 10px;
@@ -1068,8 +1080,10 @@ body { height: 100dvh; min-height: 0; }
 .poker-table { height: 100%; max-width: 1200px; min-height: 0; padding: 14px; }
 .table-felt {
   display: grid;
+  /* fr divide espaço livre. As colunas laterais acomodam perfis; a central acomoda o jogo. */
   grid-template-columns: minmax(120px, 1fr) minmax(300px, 2fr) minmax(120px, 1fr);
   grid-template-rows: 1fr 1.6fr 1fr;
+  /* Cada texto é uma linha da grade; o ponto indica uma célula sem área nomeada. */
   grid-template-areas: '. top .' 'left center right' '. bottom .';
   align-items: center;
   justify-items: center;
@@ -1077,6 +1091,7 @@ body { height: 100dvh; min-height: 0; }
   padding: 8px;
 }
 .center-area, .seat {
+  /* Anula as coordenadas/transformações antigas para que a grade organize os elementos. */
   position: relative;
   inset: auto;
   transform: none;
@@ -1089,6 +1104,7 @@ body { height: 100dvh; min-height: 0; }
 .seat-bottom { grid-area: bottom; }
 .seat { width: auto; gap: 5px; }
 .seat-top, .seat-bottom {
+  /* Avatar, nome/saldo e cartas lado a lado para economizar altura sem sobreposição. */
   display: grid;
   grid-template-columns: 44px auto auto;
   align-items: center;
@@ -1099,6 +1115,7 @@ body { height: 100dvh; min-height: 0; }
 .player-details { margin: 0; min-width: 78px; padding: 3px 8px; }
 .player-cards { height: auto; margin: 0; gap: 6px; }
 .card, .card-slot {
+  /* clamp(mínimo, tamanho flexível, máximo) limita a redução/ampliação das cartas. */
   width: clamp(38px, 5vw, 60px);
   height: clamp(54px, 10dvh, 84px);
   flex-shrink: 0;
@@ -1109,10 +1126,12 @@ body { height: 100dvh; min-height: 0; }
 .card-center-suit { font-size: 1.3rem; }
 .card { padding: 3px; }
 .player-badge:empty { display: none; }
+/* Fichas de aposta participam do fluxo do assento, em vez de cobrir cartas/perfis. */
 .seat .player-bet-chip { inset: auto; position: static; }
 .seat .player-action-bubble { top: -22px; }
 .seat-top .player-bet-chip, .seat-bottom .player-bet-chip { grid-column: 2; }
 .table-status-message { font-size: .75rem; padding: 4px 8px; }
+/* Retira o dock da posição fixa antiga: agora ocupa a segunda linha da grade principal. */
 .player-control-dock { position: relative; inset: auto; width: 100%; padding: 8px; gap: 6px; }
 .actions-wrapper { gap: 8px; }
 .action-btn { min-width: 85px; padding: 8px 12px; }
@@ -1120,6 +1139,7 @@ body { height: 100dvh; min-height: 0; }
 .slider-row { min-width: 0; }
 
 @media (max-width: 760px) {
+  /* Telas estreitas: três bots no topo, cartas comunitárias no meio e humano embaixo. */
   .app-header { height: auto; min-height: 56px; padding: 6px 10px; gap: 6px; flex-wrap: wrap; }
   .logo-title { font-size: .9rem; }
   .header-actions { gap: 4px; }
@@ -1140,6 +1160,7 @@ body { height: 100dvh; min-height: 0; }
   .table-felt { border-radius: 60px; }
   .card, .card-slot { width: clamp(32px, 8vw, 48px); height: clamp(46px, 8dvh, 68px); }
   .actions-wrapper { flex-wrap: wrap; gap: 5px; }
+  /* Coloca os controles de aumento em uma linha inteira após os demais botões. */
   .raise-container { order: 2; width: 100%; justify-content: center; }
   .hand-eval-preview { font-size: .7rem; padding: 3px 8px; }
   .action-btn { padding: 5px 10px; min-width: 75px; }
@@ -1149,6 +1170,7 @@ body { height: 100dvh; min-height: 0; }
 }
 
 @media (max-height: 600px) and (min-width: 761px) {
+  /* Janelas largas e baixas: compacta elementos para reservar espaço para toda a mesa. */
   .app-header { height: 44px; }
   .player-avatar { width: 30px; height: 30px; }
   .card, .card-slot { height: 50px; width: 36px; }

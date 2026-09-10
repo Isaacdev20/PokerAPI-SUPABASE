@@ -1,6 +1,13 @@
+GUIA DE ANOTAÇÕES
+Este arquivo é um bloco de notas; não é lido pelo jogo nem altera seu funcionamento.
+Use-o para registrar problemas e melhorias. Preserve a descrição original ao acompanhar uma correção.
 
-as cartas e os ícones com o nome e saldo estão um em cima do outro
-a tela n fica cheia tenho que rolar para baixo para ficar toda cheia 
-quero tirar a box de histórico da mesa
-quando dou all-in o jogo trava , 
-nao quero que as cartas fiquem por baixo dos perfis
+Modelo para novos registros:
+- Página: index.html (login) ou jogo.html (mesa).
+- Passos: o que clicar ou digitar para reproduzir.
+- Resultado atual: o que aconteceu.
+- Resultado esperado: o que deveria acontecer.
+- Tela/navegador: tamanho aproximado da janela e navegador utilizado.
+- Situação: pendente, em andamento ou resolvido após conferir.
+
+ANOTAÇÕES DO PROJETO

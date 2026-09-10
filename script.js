@@ -14,14 +14,19 @@
  */
 
 // Garante que o script seja executado após o carregamento completo do documento
+// Este arquivo é carregado somente por jogo.html. O login tem seu próprio script inline.
+// Fluxo principal: PokerGame -> bindEvents -> startNewHand -> processTurn ->
+// advanceToNextPlayer -> nextRoundStage -> handleShowdown (ou awardPotToWinner).
 document.addEventListener('DOMContentLoaded', () => {
   // Conexão com o SUPABASE 
   // A URL base do projeto não deve conter "/rest/v1/" no final
   const SUPABASE_URL = 'https://fojwtwzcnwwfjdfapuvd.supabase.co';
+  // Chave publicável usada no navegador, nunca uma chave secreta/service_role.
+  // Permissões de leitura/escrita precisam ser definidas no banco (RLS).
   const SUPABASE_ANON_KEY = 'sb_publishable_afLlUxeI3Q-vem8qBwj_NA_eiGOgU_X';
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  //testar a conexao com o supa
+  // Consulta de diagnóstico da integração antiga do jogo; não autentica o usuário.
   async function testarConexaoSupabase() {
     const { data, error } = await supabase
       .from('player_profiles') //Nome exato da sua tabela
@@ -457,6 +462,10 @@ document.addEventListener('DOMContentLoaded', () => {
      ========================================================================== */
   class PokerGame {
     constructor() {
+      // Estado fica neste objeto; updateUI transforma esse estado em elementos visuais.
+      // chips = saldo disponível; currentBet = aposta desta etapa;
+      // totalHandBet = soma investida na mão; folded = desistiu; allIn = sem fichas para apostar.
+      // Alterar o número/ordem dos jogadores exige ajustar também os assentos de jogo.html.
       // Lista de 4 participantes: Jogador Humano (índice 0) e 3 Bots de IA
       this.players = [
         { id: 0, name: 'Você', isBot: false, chips: 1000, cards: [], currentBet: 0, totalHandBet: 0, folded: false, allIn: false },
@@ -516,9 +525,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       this.bindEvents();
       this.updateUI();
+      // Consulta assíncrona: os saldos iniciais aparecem antes de a resposta do banco chegar.
       this.carregarDadosSupabase();
     }
     async carregarDadosSupabase() {
+      // async/await aguarda a consulta sem bloquear a interface.
+      // O perfil "teste" é fixo: ainda NÃO há associação com a tela de login.
+      // Perfis encontrados no banco substituem os valores iniciais do construtor.
       if (!supabase) return;
       //busca todos os jogadores da sua tabela
       const { data, error } = await supabase
@@ -552,6 +565,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     //Funcao para salvar o saldo de todos os jogadores(vc e os bots) no supabase
     async salvarSaldosNoSupabase() {
+      // dbId vem do carregamento dos perfis e identifica a linha a atualizar.
+      // Esta rotina salva fichas, não contas/senhas. Jogadores sem dbId são ignorados.
       if (!supabase) return;
       console.log('salvando saldos no supabase...');
       try {
@@ -566,6 +581,8 @@ document.addEventListener('DOMContentLoaded', () => {
           //onde o ID for igual ID do jogador
         });
         //executa todas as atualizacoes juntas
+        // Aguarda as atualizações em paralelo. Atenção: respostas com { error } precisam
+        // ser inspecionadas para confirmar sucesso; catch trata apenas promessas rejeitadas.
         await Promise.all(atualizacoes);
         console.log('✅ Supabase: Saldos atualizados com sucesso!');
         this.addLog('💾 Saldos salvos no Supabase.');
@@ -578,6 +595,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Vincula os cliques dos botões aos respectivos métodos
     bindEvents() {
+      // addEventListener liga eventos do DOM a métodos. Arrow functions preservam
+      // o "this" da instância do jogo dentro dos callbacks de clique.
       // Controles do jogador
       this.dom.btnFold.addEventListener('click', () => this.handlePlayerAction('FOLD'));
       this.dom.btnCheckCall.addEventListener('click', () => this.handlePlayerAction('CHECK_CALL'));
@@ -640,6 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setBetInputValue(amount) {
+      // Converte os limites textuais dos inputs para números e mantém o valor dentro deles.
       amount = Math.max(Number(this.dom.betInput.min), Math.min(Number(this.dom.betInput.max), amount));
       this.dom.betSlider.value = amount;
       this.dom.betInput.value = amount;
@@ -653,6 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Restaura fichas e zera a mesa
     resetEntireGame() {
+      // Reiniciar restaura o estado local. Não é um logout nem um novo cadastro.
       this.players.forEach(p => {
         p.chips = 1000;
         p.cards = [];
@@ -682,6 +703,7 @@ document.addEventListener('DOMContentLoaded', () => {
        INÍCIO DE UMA NOVA MÃO
        ------------------------------------------------------------------------ */
     startNewHand() {
+      // Diferente de reiniciar: mantém os saldos e prepara apenas cartas/apostas da nova mão.
       // Remove destaques de cartas vencedoras anteriores
       document.querySelectorAll('.card').forEach(c => c.classList.remove('winning-card'));
 
@@ -762,6 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
        CONTROLE DE TURNOS E FASES
        ------------------------------------------------------------------------ */
     processTurn() {
+      // Primeiro verifica se a mão já pode terminar; só então habilita humano ou agenda bot.
       // Verifica se resta apenas 1 jogador ativo (todos os outros desistiram/folded)
       const activePlayers = this.players.filter(p => !p.folded);
       if (activePlayers.length === 1) {
@@ -796,6 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Se for um Bot, simula tempo de reflexão (700ms a 1100ms)
         this.dom.tableStatusMsg.textContent = `${currentPlayer.name} está pensando...`;
         this.disablePlayerControls();
+        // 850 é o atraso em milissegundos; altere aqui para mudar o tempo de reflexão do bot.
         setTimeout(() => {
           this.botAction(currentPlayer);
         }, 850);
@@ -815,6 +839,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Busca o próximo jogador em sentido horário
       let nextIndex = (this.activeTurnIndex + 1) % this.players.length;
+      // % faz a contagem voltar ao índice zero depois do último jogador.
       let loops = 0;
       while ((this.players[nextIndex].folded || this.players[nextIndex].allIn) && loops < this.players.length) {
         if (nextIndex === this.lastToActIndex && isBettingSettled) {
@@ -831,6 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Transição entre as rodadas de apostas (Flop, Turn, River, Showdown)
     nextRoundStage() {
+      // Os retornos antecipados evitam procurar indefinidamente um apostador inexistente.
       const activePlayers = this.players.filter(p => !p.folded);
       if (activePlayers.length === 1) {
         this.awardPotToWinner(activePlayers[0], 'Todos os outros desistiram.');
@@ -841,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
         this.runRemainingCardsToShowdown();
         return;
       }
-      // Recolhe as apostas individuais para o pote principal e zera currentBet da rodada
+      // Zera as apostas da etapa; as fichas já foram adicionadas ao pote no momento da ação.
       this.players.forEach(p => {
         p.currentBet = 0;
         const bubble = document.getElementById(`action-${p.id}`);
@@ -901,6 +927,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Se todos estiverem All-in, revela as cartas restantes da mesa diretamente
     runRemainingCardsToShowdown() {
+      // Revelação automática quando não há mais disputa de apostas.
+      // Os setTimeout abaixo espaçam as animações; valores estão em milissegundos.
       this.disablePlayerControls();
       const revealNext = () => {
         if (this.communityCards.length < 3) {
@@ -927,6 +955,8 @@ document.addEventListener('DOMContentLoaded', () => {
        AÇÕES DO JOGADOR HUMANO
        ------------------------------------------------------------------------ */
     handlePlayerAction(actionType, raiseValue = 0) {
+      // actionType aceita FOLD, CHECK_CALL ou RAISE.
+      // raiseValue é a aposta TOTAL desejada na etapa, incluindo o que já foi colocado.
       const player = this.players[0];
       if (this.activeTurnIndex !== 0 || player.folded || player.allIn ||
           this.gameStage === 'IDLE' || this.gameStage === 'SHOWDOWN') return;
@@ -961,6 +991,7 @@ document.addEventListener('DOMContentLoaded', () => {
         this.advanceToNextPlayer();
 
       } else if (actionType === 'RAISE') {
+        // Ex.: saldo 980 + aposta anterior 20 = alvo de all-in 1000, pagando mais 980.
         const maxTarget = player.currentBet + player.chips;
         const totalTargetBet = Math.min(maxTarget, Math.max(this.currentBet + this.minRaise, Number(raiseValue) || 0));
         const additionalChips = totalTargetBet - player.currentBet;
@@ -995,6 +1026,8 @@ document.addEventListener('DOMContentLoaded', () => {
        Analisa a força da mão e perfil do bot para tomar decisões estratégicas.
        ------------------------------------------------------------------------ */
     botAction(bot) {
+      // Heurística simples, não um cálculo exato de probabilidade de vitória.
+      // Ajuste limiares de randomFactor/costRatio abaixo para mudar agressividade e blefes.
       const callDiff = this.currentBet - bot.currentBet;
       const allCards = [...bot.cards, ...this.communityCards];
       const evaluation = HandEvaluator.getBestHand(allCards);
@@ -1102,6 +1135,8 @@ document.addEventListener('DOMContentLoaded', () => {
        SHOWDOWN: COMPARAÇÃO DAS MÃOS E ENTREGA DO POTE
        ------------------------------------------------------------------------ */
     handleShowdown() {
+      // Limitação atual: o pote é dividido entre as melhores mãos sem calcular potes
+      // laterais para all-ins de valores diferentes; empates usam divisão inteira.
       this.disablePlayerControls();
       this.dom.currentRoundName.textContent = 'Showdown!';
       this.dom.tableStatusMsg.textContent = 'Showdown! Revelando as cartas de todos...';
@@ -1181,6 +1216,8 @@ document.addEventListener('DOMContentLoaded', () => {
        ATUALIZAÇÃO DA INTERFACE VISUAL (DOM)
        ------------------------------------------------------------------------ */
     updateUI() {
+      // Centraliza a renderização. Não altere saldos apenas no HTML: atualize players
+      // e chame este método, ou a próxima renderização sobrescreverá a mudança visual.
       // 1. Atualiza o estágio da rodada no topo
       const stageNames = {
         'IDLE': 'Aguardando Início',
@@ -1279,6 +1316,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Habilita os botões de ação para o jogador humano
     enablePlayerControls() {
+      // Recalcula limites a cada turno: o saldo sozinho não representa o alvo total de aumento.
       const user = this.players[0];
       const callDiff = this.currentBet - user.currentBet;
 

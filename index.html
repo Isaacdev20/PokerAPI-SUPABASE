@@ -1,369 +1,91 @@
 <!DOCTYPE html>
+<!--
+  PÁGINA DE ENTRADA: esta é somente uma interface, sem autenticação ou cadastro.
+  Aparência: login.css. Interações: bloco <script> no fim deste arquivo.
+  O jogo permanece em jogo.html, que pode ser aberto diretamente.
+  Textos podem ser editados aqui; mantenha os IDs usados pelo JavaScript.
+-->
 <html lang="pt-BR">
 <head>
+  <!-- UTF-8 permite acentos e naipes; viewport adapta a largura aos celulares. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Texas Hold'em Poker - Cassino Virtual</title>
-  
-  <!-- Fonte moderna e elegante do Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Folha de estilos do jogo -->
-  <link rel="stylesheet" href="style.css">
+  <title>Entrar — Royal Hold'em</title>
+  <!-- Altere o título acima para mudar o nome exibido na aba do navegador. -->
+  <link rel="stylesheet" href="login.css">
 </head>
 <body>
-
-  <!-- ================================================================= -->
-  <!-- BARRA SUPERIOR (HEADER): Informações gerais e botões de controle -->
-  <!-- ================================================================= -->
-  <header class="app-header">
-    <div class="logo-area">
-      <span class="logo-icon">♠</span>
-      <h1 class="logo-title">ROYAL HOLD'EM</h1>
+  <main class="login-page">
+    <!-- Marca: aria-label fornece o nome acessível; o naipe é apenas decorativo. -->
+    <div class="brand" aria-label="Royal Hold'em">
+      <span class="brand-suit" aria-hidden="true">♠</span>
+      <span>ROYAL <strong>HOLD'EM</strong></span>
     </div>
 
-    <!-- Indicador da rodada atual (Pré-Flop, Flop, Turn, River, Showdown) -->
-    <div class="round-indicator-pill">
-      <span class="pulse-dot"></span>
-      <span id="current-round-name">Aguardando Início</span>
-    </div>
+    <section class="login-card" aria-labelledby="login-title">
+      <!-- Título e descrição da caixa. aria-labelledby aponta para o ID do título. -->
+      <span class="eyebrow">SEU LUGAR À MESA</span>
+      <h1 id="login-title">Bem-vindo de volta</h1>
+      <p class="intro">Entre na sua conta para começar a jogar.</p>
 
-    <!-- Botões de ação do cabeçalho: Regras, Som e Novo Jogo -->
-    <div class="header-actions">
-      <button id="btn-rules" class="btn-header" title="Ver regras do poker e ordem das mãos">
-        <span class="icon">📖</span> Regras
-      </button>
-      <button id="btn-sound-toggle" class="btn-header" title="Ativar ou desativar efeitos sonoros">
-        <span class="icon" id="sound-icon">🔊</span> Som: <span id="sound-status">Ligado</span>
-      </button>
-      <button id="btn-restart" class="btn-header btn-restart" title="Reiniciar fichas e começar nova partida">
-        <span class="icon">🔄</span> Reiniciar
-      </button>
-    </div>
-  </header>
+      <form id="login-form">
+        <!--
+          for conecta o rótulo ao id do campo. name identifica o dado do formulário.
+          required impede envio vazio; maxlength limita o usuário a 50 caracteres.
+          autocomplete ajuda o preenchimento; placeholder é a dica dentro do campo.
+          autocapitalize e spellcheck evitam corrigir automaticamente o usuário.
+        -->
+        <label for="username">Nome de usuário</label>
+        <input id="username" name="username" type="text" placeholder="Digite seu usuário" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="50">
 
-  <!-- ================================================================= -->
-  <!-- CONTEÚDO PRINCIPAL: Mesa de Poker e Interface de Jogo             -->
-  <!-- ================================================================= -->
-  <main class="table-container">
-    
-    <!-- A MESA DE POKER (Formato Oval com Feltro Verde de Cassino) -->
-    <div class="poker-table" id="poker-table">
-      
-      <!-- Borda de madeira e linha guia interna da mesa -->
-      <div class="table-felt">
-        <div class="table-inner-ring"></div>
-
-        <!-- ------------------------------------------------------------- -->
-        <!-- ÁREA CENTRAL DA MESA: Cartas Comunitárias e Pote             -->
-        <!-- ------------------------------------------------------------- -->
-        <div class="center-area">
-          
-          <!-- Pote acumulado da rodada -->
-          <div class="pot-display" id="pot-display">
-            <span class="pot-icon">🪙</span>
-            <div class="pot-info">
-              <span class="pot-label">POTE TOTAL</span>
-              <span class="pot-value" id="pot-amount">$0</span>
-            </div>
-          </div>
-
-          <!-- As 5 Cartas Comunitárias (Flop 1, 2, 3; Turn; River) -->
-          <div class="community-cards" id="community-cards">
-            <div class="card-slot" id="flop-1"><span class="slot-label">Flop 1</span></div>
-            <div class="card-slot" id="flop-2"><span class="slot-label">Flop 2</span></div>
-            <div class="card-slot" id="flop-3"><span class="slot-label">Flop 3</span></div>
-            <div class="card-slot" id="turn"><span class="slot-label">Turn</span></div>
-            <div class="card-slot" id="river"><span class="slot-label">River</span></div>
-          </div>
-
-          <!-- Mensagem central de status da mesa (Ex: "Aguardando apostas...") -->
-          <div class="table-status-message" id="table-status-msg">
-            Bem-vindo à mesa! Clique em "Nova Mão" para jogar.
-          </div>
-
-        </div> <!-- Fim .center-area -->
-
-        <!-- ------------------------------------------------------------- -->
-        <!-- ASSENTOS DOS JOGADORES (1 Jogador Humano e 3 Bots de IA)     -->
-        <!-- ------------------------------------------------------------- -->
-
-        <!-- ASSENTO 1 (BOT ESQUERDA - Sofia) -->
-        <div class="seat seat-bot seat-left" id="seat-1">
-          <div class="player-badge" id="badge-1"></div>
-          <div class="player-avatar">
-            <span class="avatar-emoji">👩‍💼</span>
-            <div class="dealer-button" id="dealer-1" style="display: none;">D</div>
-          </div>
-          <div class="player-details">
-            <span class="player-name" id="name-1">Sofia</span>
-            <span class="player-chips" id="chips-1">$1.000</span>
-          </div>
-          <!-- Cartas do Bot (fechadas até o Showdown) -->
-          <div class="player-cards" id="cards-1">
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-          </div>
-          <!-- Aposta atual feita na rodada -->
-          <div class="player-bet-chip" id="bet-1" style="display: none;">$0</div>
-          <!-- Balão com a última ação do jogador (ex: "Check", "Fold", "Raise") -->
-          <div class="player-action-bubble" id="action-1" style="display: none;"></div>
+        <label for="password">Senha</label>
+        <div class="password-field">
+          <!-- type="password" mascara o texto visualmente; não autentica nem criptografa dados. -->
+          <input id="password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required>
+          <button class="show-password" id="show-password" type="button" aria-label="Mostrar senha" aria-controls="password" aria-pressed="false">Mostrar</button>
+          <!-- type="button" evita enviar o formulário; aria-pressed indica se a senha está visível. -->
         </div>
 
-        <!-- ASSENTO 2 (BOT TOPO - Lucas) -->
-        <div class="seat seat-bot seat-top" id="seat-2">
-          <div class="player-badge" id="badge-2"></div>
-          <div class="player-avatar">
-            <span class="avatar-emoji">🤵</span>
-            <div class="dealer-button" id="dealer-2" style="display: none;">D</div>
-          </div>
-          <div class="player-details">
-            <span class="player-name" id="name-2">Lucas</span>
-            <span class="player-chips" id="chips-2">$1.000</span>
-          </div>
-          <div class="player-cards" id="cards-2">
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-          </div>
-          <div class="player-bet-chip" id="bet-2" style="display: none;">$0</div>
-          <div class="player-action-bubble" id="action-2" style="display: none;"></div>
-        </div>
-
-        <!-- ASSENTO 3 (BOT DIREITA - Elena) -->
-        <div class="seat seat-bot seat-right" id="seat-3">
-          <div class="player-badge" id="badge-3"></div>
-          <div class="player-avatar">
-            <span class="avatar-emoji">🧕</span>
-            <div class="dealer-button" id="dealer-3" style="display: none;">D</div>
-          </div>
-          <div class="player-details">
-            <span class="player-name" id="name-3">Elena</span>
-            <span class="player-chips" id="chips-3">$1.000</span>
-          </div>
-          <div class="player-cards" id="cards-3">
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-          </div>
-          <div class="player-bet-chip" id="bet-3" style="display: none;">$0</div>
-          <div class="player-action-bubble" id="action-3" style="display: none;"></div>
-        </div>
-
-        <!-- ASSENTO 0 (VOCÊ - JOGADOR PRINCIPAL NA BASE DA MESA) -->
-        <div class="seat seat-human seat-bottom" id="seat-0">
-          <div class="player-badge" id="badge-0"></div>
-          <div class="player-avatar">
-            <span class="avatar-emoji">👑</span>
-            <div class="dealer-button" id="dealer-0" style="display: none;">D</div>
-          </div>
-          <div class="player-details">
-            <span class="player-name" id="name-0">Você</span>
-            <span class="player-chips" id="chips-0">$1.000</span>
-          </div>
-          <!-- Suas duas cartas visíveis -->
-          <div class="player-cards" id="cards-0">
-            <!-- Geradas dinamicamente pelo JavaScript -->
-          </div>
-          <div class="player-bet-chip" id="bet-0" style="display: none;">$0</div>
-          <div class="player-action-bubble" id="action-0" style="display: none;"></div>
-        </div>
-
-      </div> <!-- Fim .table-felt -->
-    </div> <!-- Fim .poker-table -->
-
-    <!-- =============================================================== -->
-    <!-- PAINEL DE CONTROLE DO JOGADOR (Ações e Apostas)                 -->
-    <!-- =============================================================== -->
-    <section class="player-control-dock">
-      
-      <!-- Indicador da melhor mão formada com as cartas abertas -->
-      <div class="hand-eval-preview">
-        <span class="eval-label">Sua Combinação Atual:</span>
-        <strong class="eval-result" id="player-hand-rank">Aguardando cartas...</strong>
-      </div>
-
-      <!-- Barra de controles de aposta -->
-      <div class="actions-wrapper">
-
-        <!-- Botão: Desistir da mão atual (Fold) -->
-        <button id="btn-fold" class="action-btn btn-fold" disabled>
-          <span class="btn-icon">✖</span>
-          <span class="btn-text">Desistir</span>
-          <span class="btn-subtext">Fold</span>
-        </button>
-
-        <!-- Botão: Passar a vez (Check) ou Pagar a aposta (Call) -->
-        <button id="btn-check-call" class="action-btn btn-check" disabled>
-          <span class="btn-icon">✔</span>
-          <span class="btn-text" id="label-check-call">Mesa</span>
-          <span class="btn-subtext" id="subtext-check-call">Check</span>
-        </button>
-
-        <!-- Área de Aumento / Aposta (Raise / Bet) -->
-        <div class="raise-container">
-          
-          <!-- Botões de atalho rápido de aposta -->
-          <div class="bet-presets">
-            <button class="preset-btn" id="preset-min">Mínimo</button>
-            <button class="preset-btn" id="preset-half-pot">1/2 Pote</button>
-            <button class="preset-btn" id="preset-pot">Pote</button>
-            <button class="preset-btn preset-allin" id="preset-allin">All-In</button>
-          </div>
-
-          <!-- Slider e campo numérico de aposta -->
-          <div class="slider-row">
-            <input type="range" id="bet-slider" min="20" max="1000" step="10" value="20" disabled>
-            <div class="bet-input-display">
-              <span class="currency-symbol">$</span>
-              <input type="number" id="bet-input" min="20" max="1000" step="10" value="20" disabled>
-            </div>
-          </div>
-
-          <!-- Botão principal de confirmar aposta ou aumento -->
-          <button id="btn-raise" class="action-btn btn-raise" disabled>
-            <span class="btn-icon">▲</span>
-            <span class="btn-text" id="label-raise">Aumentar</span>
-            <span class="btn-subtext" id="subtext-raise">Raise</span>
-          </button>
-        </div>
-
-        <!-- Botão de Iniciar Próxima Mão (visível entre mãos) -->
-        <button id="btn-next-hand" class="action-btn btn-next-hand">
-          <span class="btn-icon">▶</span>
-          <span class="btn-text">Nova Mão</span>
-          <span class="btn-subtext">Distribuir</span>
-        </button>
-
-      </div> <!-- Fim .actions-wrapper -->
+        <!-- submit dispara o evento do formulário, inclusive quando a pessoa pressiona Enter. -->
+        <button class="login-button" type="submit">Entrar <span aria-hidden="true">→</span></button>
+      </form>
     </section>
 
-
-  </main>
-
-  <!-- ================================================================= -->
-  <!-- MODAL INFORMATIVO: Regras do Jogo e Classificação das Mãos        -->
-  <!-- ================================================================= -->
-  <div class="modal-backdrop" id="modal-rules" style="display: none;">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2>Regras do Texas Hold'em & Hierarquia das Mãos</h2>
-        <button class="modal-close" id="btn-close-rules">&times;</button>
-      </div>
-      <div class="modal-body">
-        
-        <section class="rules-section">
-          <h3>Como Funciona o Jogo:</h3>
-          <p>1. Cada jogador recebe <strong>2 cartas fechadas</strong> que só ele pode ver.</p>
-          <p>2. Cinco <strong>cartas comunitárias</strong> são abertas no centro da mesa em três etapas: o <em>Flop</em> (3 cartas), o <em>Turn</em> (1 carta) e o <em>River</em> (1 carta).</p>
-          <p>3. Seu objetivo é formar a <strong>melhor combinação de 5 cartas</strong> possível combinando as suas 2 cartas privadas com as 5 comunitárias.</p>
-          <p>4. Em cada rodada, você pode <strong>Passar (Check)</strong>, <strong>Pagar (Call)</strong>, <strong>Aumentar (Raise)</strong> ou <strong>Desistir (Fold)</strong>.</p>
-        </section>
-
-        <section class="rules-section">
-          <h3>Classificação das Mãos (Da mais forte para a mais fraca):</h3>
-          
-          <div class="hand-rank-list">
-            <div class="hand-rank-card">
-              <span class="rank-number">1</span>
-              <div class="rank-info">
-                <strong>Royal Flush</strong>
-                <p>10, Valete, Dama, Rei e Ás do mesmo naipe.</p>
-              </div>
-              <span class="rank-sample">A♠ K♠ Q♠ J♠ 10♠</span>
-            </div>
-
-            <div class="hand-rank-card">
-              <span class="rank-number">2</span>
-              <div class="rank-info">
-                <strong>Straight Flush</strong>
-                <p>Cinco cartas em sequência numérica do mesmo naipe.</p>
-              </div>
-              <span class="rank-sample">9♥ 8♥ 7♥ 6♥ 5♥</span>
-            </div>
-
-            <div class="hand-rank-card">
-              <span class="rank-number">3</span>
-              <div class="rank-info">
-                <strong>Quadra (Four of a Kind)</strong>
-                <p>Quatro cartas de mesmo valor numérico.</p>
-              </div>
-              <span class="rank-sample">K♦ K♣ K♠ K♥ 3♣</span>
-            </div>
-
-            <div class="hand-rank-card">
-              <span class="rank-number">4</span>
-              <div class="rank-info">
-                <strong>Full House</strong>
-                <p>Uma trinca acompanhada de um par.</p>
-              </div>
-              <span class="rank-sample">J♠ J♦ J♣ 8♥ 8♠</span>
-            </div>
-
-            <div class="hand-rank-card">
-              <span class="rank-number">5</span>
-              <div class="rank-info">
-                <strong>Flush (Cor)</strong>
-                <p>Cinco cartas quaisquer pertencentes ao mesmo naipe.</p>
-              </div>
-              <span class="rank-sample">A♦ J♦ 8♦ 6♦ 2♦</span>
-            </div>
-
-            <div class="hand-rank-card">
-              <span class="rank-number">6</span>
-              <div class="rank-info">
-                <strong>Sequência (Straight)</strong>
-                <p>Cinco cartas em sequência numérica de naipes diferentes.</p>
-              </div>
-              <span class="rank-sample">8♣ 7♥ 6♦ 5♠ 4♥</span>
-            </div>
-
-            <div class="hand-rank-card">
-              <span class="rank-number">7</span>
-              <div class="rank-info">
-                <strong>Trinca (Three of a Kind)</strong>
-                <p>Três cartas com o mesmo valor.</p>
-              </div>
-              <span class="rank-sample">7♣ 7♦ 7♠ K♥ 2♣</span>
-            </div>
-
-            <div class="hand-rank-card">
-              <span class="rank-number">8</span>
-              <div class="rank-info">
-                <strong>Dois Pares (Two Pair)</strong>
-                <p>Dois pares numéricos diferentes.</p>
-              </div>
-              <span class="rank-sample">Q♠ Q♥ 4♣ 4♦ A♠</span>
-            </div>
-
-            <div class="hand-rank-card">
-              <span class="rank-number">9</span>
-              <div class="rank-info">
-                <strong>Um Par (One Pair)</strong>
-                <p>Duas cartas com o mesmo valor.</p>
-              </div>
-              <span class="rank-sample">10♥ 10♦ A♣ 8♠ 4♦</span>
-            </div>
-
-            <div class="hand-rank-card">
-              <span class="rank-number">10</span>
-              <div class="rank-info">
-                <strong>Carta Mais Alta (High Card)</strong>
-                <p>Quando nenhuma combinação acima é alcançada, ganha quem tem a maior carta.</p>
-              </div>
-              <span class="rank-sample">A♠ J♥ 9♦ 5♣ 2♥</span>
-            </div>
-          </div>
-        </section>
-
-      </div>
+    <div class="signup-area">
+      <!-- Fica fora da section para posicionar o cadastro abaixo da caixa de login. -->
+      <p>Ainda não tem uma conta?</p>
+      <button class="signup-button" id="create-account" type="button">Criar conta</button>
     </div>
-  </div>
-
-  <!-- Biblioteca oficial do Supabase JS via CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Script principal contendo toda a lógica do jogo -->
-  <script src="script.js"></script>
+    <!-- Mensagens são preenchidas pelo JS e anunciadas por leitores de tela sem mover o foco. -->
+    <p class="status-message" id="status-message" role="status" aria-live="polite"></p>
+    <div class="suits" aria-hidden="true">♠ <span>♥</span> ♣ <span>♦</span></div>
+  </main>
+  <script>
+    // Executado depois do HTML: os campos e botões já existem no documento (DOM).
+    // Guardamos as referências para não precisar procurar os elementos a cada clique.
+    const password = document.getElementById('password');
+    const toggle = document.getElementById('show-password');
+    const status = document.getElementById('status-message');
+    toggle.addEventListener('click', () => {
+      // visible será true quando a senha estiver oculta e precisar ser mostrada.
+      const visible = password.type === 'password';
+      // Operador ternário: condição ? valor quando verdadeira : valor quando falsa.
+      password.type = visible ? 'text' : 'password';
+      toggle.textContent = visible ? 'Ocultar' : 'Mostrar';
+      // Mantém a descrição acessível e o estado do botão sincronizados com a aparência.
+      toggle.setAttribute('aria-label', visible ? 'Ocultar senha' : 'Mostrar senha');
+      toggle.setAttribute('aria-pressed', String(visible));
+    });
+    document.getElementById('login-form').addEventListener('submit', event => {
+      // Cancela o envio padrão: não recarrega a página nem coloca as credenciais na URL.
+      event.preventDefault();
+      // Prévia visual: não salva senha, não chama Supabase e não libera acesso ao jogo.
+      status.textContent = 'Esta é uma prévia da tela. O login ainda não está disponível.';
+    });
+    document.getElementById('create-account').addEventListener('click', () => {
+      // Ponto de alteração futura para abrir uma tela de cadastro. Hoje só exibe um aviso.
+      status.textContent = 'A criação de contas ainda não está disponível nesta prévia.';
+    });
+  </script>
 </body>
 </html>

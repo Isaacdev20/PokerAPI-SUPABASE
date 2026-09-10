@@ -1,6 +1,6 @@
 # ♠️ Royal Hold'em - Jogo de Poker Texas Hold'em
 
-Um jogo completo, interativo e visualmente elegante de **Texas Hold'em Poker** construído exclusivamente com tecnologias web nativas (**HTML5**, **CSS3** e **JavaScript puro**), sem necessidade de frameworks ou dependências externas.
+Um jogo completo, interativo e visualmente elegante de **Texas Hold'em Poker** construído exclusivamente com tecnologias web nativas (**HTML5**, **CSS3** e **JavaScript puro**), sem frameworks. A tela do jogo carrega a biblioteca Supabase e fontes externas; a tela de login usa apenas arquivos locais.
 
 O projeto foi projetado com código limpo e amplamente comentado para fins educacionais, permitindo que qualquer pessoa — de estudantes a desenvolvedores — entenda a arquitetura de um jogo de cartas, avaliação matemática de probabilidades e criação de inteligência artificial simples.
 
@@ -12,7 +12,7 @@ O projeto foi projetado com código limpo e amplamente comentado para fins educa
 3. [Como Jogar Texas Hold'em](#-como-jogar-texas-holdem)
 4. [Hierarquia Oficial das Mãos de Poker](#-hierarquia-oficial-das-mãos-de-poker)
 5. [Arquitetura e Explicação dos Arquivos](#-arquitetura-e-explicação-dos-arquivos)
-   - [index.html (Estrutura)](#1-indexhtml)
+   - [jogo.html (Estrutura)](#1-jogohtml)
    - [style.css (Aparência e Animações)](#2-stylecss)
    - [script.js (Lógica e Motor do Jogo)](#3-scriptjs)
 6. [Inteligência Artificial (Como os Bots Decidem)](#-inteligência-artificial-dos-bots)
@@ -40,7 +40,7 @@ Não é necessário instalar nada (sem `npm`, sem `node`, sem servidor local).
 
 1. Abra a pasta do projeto no seu computador.
 2. Dê um duplo clique no arquivo [`index.html`](index.html).
-3. O jogo abrirá imediatamente em qualquer navegador moderno (Chrome, Edge, Firefox, Safari ou Opera).
+3. O arquivo `index.html` abre a prévia visual do login. Os botões ainda não autenticam nem criam contas. Para jogar, abra diretamente [`jogo.html`](jogo.html).
 4. Clique no botão dourado **"Nova Mão"** no painel inferior para iniciar a primeira rodada!
 
 ---
@@ -92,20 +92,20 @@ Da mais rara e forte para a mais fraca:
 
 ## 🛠️ Arquitetura e Explicação dos Arquivos
 
-O projeto é dividido em 3 arquivos principais, cada um com uma responsabilidade clara e comentários explicativos:
+O projeto separa a entrada visual da mesa de poker. Os arquivos possuem comentários por responsabilidade e nos pontos de alteração:
 
-### 1. [`index.html`](index.html)
+### 1. [`jogo.html`](jogo.html)
 Responsável pelo esqueleto visual e pela semântica da aplicação:
 - **`<header class="app-header">`**: Contém o título, indicador de rodada ativa (Pré-flop, Flop, etc.) e botões de controle (Regras, Som e Reiniciar).
 - **`<div class="poker-table">`**: A mesa de poker em si. Dentro dela estão os 4 assentos (`.seat`) posicionados em cruz e a área central (`.center-area`) com o pote e as 5 cartas comunitárias.
-- **`<section class="player-control-dock">`**: Barra inferior fixa com visualização da mão do jogador e botões de aposta.
-- **`<aside class="game-log-panel">`**: Caixa lateral que exibe em tempo real o histórico de todas as ações dos jogadores.
+- **`<section class="player-control-dock">`**: Barra inferior na grade da página, com visualização da mão e botões de aposta.
+- **Histórico:** o painel visual foi removido. `addLog` envia mensagens ao console do navegador.
 - **`<div class="modal-backdrop" id="modal-rules">`**: Janela de diálogo que exibe as regras e a tabela de mãos.
 
 ### 2. [`style.css`](style.css)
 Responsável pelo design refinado e pela sensação de jogo de cassino:
 - **Design Tokens (`:root`)**: Centraliza as cores (verde esmeralda, dourado, feltro escuro), fontes e sombras.
-- **Layout da Mesa**: Utiliza coordenadas absolutas calculadas para distribuir os jogadores harmoniosamente ao redor da elipse.
+- **Layout da Mesa**: Utiliza uma grade CSS nas regras finais do arquivo para separar jogadores, cartas e controles. Essas regras substituem posições absolutas da base antiga.
 - **Estilização das Cartas (`.card`)**: Efeito 3D com naipes vermelhos (`♥`, `♦`) e pretos (`♠`, `♣`), verso estilizado com textura de cassino e brilho dourado (`winning-card`) para destacar as cartas vitoriosas no showdown.
 - **Responsividade (`@media`)**: Ajusta proporções para caber perfeitamente em notebooks e telas menores.
 
@@ -141,3 +141,40 @@ Para garantir que o projeto funcione **em qualquer ambiente sem erros de carrega
 ---
 
 *Desenvolvido com foco em código limpo, boas práticas e aprendizado prático de desenvolvimento web.*
+
+## Guia para quem vai modificar o projeto
+
+| Arquivo | Responsabilidade | Onde alterar |
+| --- | --- | --- |
+| `index.html` | Estrutura do login e seu JavaScript local | Textos, campos, mensagens e botão de mostrar senha |
+| `login.css` | Aparência do login | Cores, largura da caixa, espaçamentos e adaptação ao celular |
+| `jogo.html` | Estrutura da mesa e janela de regras | Rótulos, assentos e conteúdo das regras |
+| `style.css` | Aparência da mesa | Variáveis em `:root`; posicionamento nas regras finais de grade e `@media` |
+| `script.js` | Baralho, avaliação das mãos, bots, turnos e integração antiga com Supabase | Métodos da classe `PokerGame` e módulos comentados |
+| `Problemas.txt` | Anotações manuais de problemas | Descreva como reproduzir e qual resultado esperava |
+| `README.md` | Instruções do projeto | Atualize quando a estrutura ou o funcionamento mudar |
+
+### Como ler os comentários
+
+- HTML usa `<!-- comentário -->`; CSS usa `/* comentário */`; JavaScript usa `//` ou `/* ... */`. Comentários explicam o código e não são executados.
+- `class` conecta HTML ao CSS; `id` identifica um elemento, inclusive nas chamadas `getElementById`. Ao renomear um ID, procure suas referências nos outros arquivos.
+- `const` declara uma referência que não será reatribuída; `let` permite reatribuição. `this` representa a instância atual de `PokerGame` nos métodos da classe.
+- No CSS, regras posteriores de mesma especificidade prevalecem. As regras finais de `style.css` são essenciais para o layout atual.
+- Valores em `setTimeout` usam milissegundos. `currentBet` é a aposta da etapa; `totalHandBet` acumula a mão toda; `chips` é o saldo disponível.
+
+### Estado atual e pontos de atenção ao modificar
+
+O login é somente visual: não guarda credenciais, não chama Supabase e não protege `jogo.html`. `Entrar` e `Criar conta` apenas exibem mensagens de prévia.
+
+A mesa mantém a integração anterior com Supabase e carrega o perfil fixo `teste`, além dos bots. Não existe vínculo entre esse perfil e o nome digitado no login. As permissões do banco devem ser configuradas no Supabase; nunca coloque uma chave secreta no código do navegador.
+
+O cálculo atual de vencedores não implementa potes laterais para all-ins de valores diferentes. A divisão de empates usa valores inteiros. Esses pontos exigem mudanças na lógica se forem ampliadas as regras do jogo.
+
+### Conferência depois de uma alteração
+
+1. Abra `index.html`: confira textos, campos obrigatórios, mostrar/ocultar senha e mensagens dos dois botões.
+2. Abra `jogo.html`: confira Nova Mão, ações do jogador, all-in, próxima rodada e Reiniciar.
+3. Redimensione a janela: perfis, cartas e controles devem continuar separados.
+4. Use F12 para consultar erros no console. A tela do jogo depende do carregamento da biblioteca externa do Supabase.
+
+`verification.html` foi um arquivo temporário de verificação e não faz parte dos arquivos atuais do projeto.
