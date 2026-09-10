@@ -443,7 +443,7 @@ body {
 /* Cartas na mão de cada jogador */
 .player-cards {
   display: flex;
-  gap: -14px; /* Sobreposição elegante no estilo cassino */
+  gap: 6px;
   margin-top: 6px;
   height: 94px;
 }
@@ -714,7 +714,7 @@ body {
   background: linear-gradient(135deg, var(--gold-primary), #b7950b);
   color: #111;
   font-weight: 800;
-  display: none; /* Exibido apenas no final da rodada */
+  display: flex; /* Visível no início; o JavaScript oculta durante a mão. */
 }
 
 /* Área de controle de aposta (Sliders e Atalhos) */
@@ -1052,4 +1052,108 @@ body {
     min-width: 90px;
     padding: 8px 12px;
   }
+}
+
+/* Mesa e controles compartilham a altura disponível, sem se sobrepor. */
+body { height: 100dvh; min-height: 0; }
+.app-header { flex-shrink: 0; }
+.table-container {
+  min-height: 0;
+  padding: 10px;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  justify-items: center;
+  gap: 10px;
+}
+.poker-table { height: 100%; max-width: 1200px; min-height: 0; padding: 14px; }
+.table-felt {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(300px, 2fr) minmax(120px, 1fr);
+  grid-template-rows: 1fr 1.6fr 1fr;
+  grid-template-areas: '. top .' 'left center right' '. bottom .';
+  align-items: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 8px;
+}
+.center-area, .seat {
+  position: relative;
+  inset: auto;
+  transform: none;
+  min-width: 0;
+}
+.center-area { grid-area: center; gap: 6px; width: 100%; }
+.seat-left { grid-area: left; }
+.seat-right { grid-area: right; }
+.seat-top { grid-area: top; }
+.seat-bottom { grid-area: bottom; }
+.seat { width: auto; gap: 5px; }
+.seat-top, .seat-bottom {
+  display: grid;
+  grid-template-columns: 44px auto auto;
+  align-items: center;
+  gap: 12px;
+}
+.player-avatar { width: 40px; height: 40px; }
+.avatar-emoji { font-size: 1.3rem; }
+.player-details { margin: 0; min-width: 78px; padding: 3px 8px; }
+.player-cards { height: auto; margin: 0; gap: 6px; }
+.card, .card-slot {
+  width: clamp(38px, 5vw, 60px);
+  height: clamp(54px, 10dvh, 84px);
+  flex-shrink: 0;
+}
+.community-cards { gap: 6px; }
+.card-val { font-size: .85rem; }
+.card-icon { font-size: .65rem; }
+.card-center-suit { font-size: 1.3rem; }
+.card { padding: 3px; }
+.player-badge:empty { display: none; }
+.seat .player-bet-chip { inset: auto; position: static; }
+.seat .player-action-bubble { top: -22px; }
+.seat-top .player-bet-chip, .seat-bottom .player-bet-chip { grid-column: 2; }
+.table-status-message { font-size: .75rem; padding: 4px 8px; }
+.player-control-dock { position: relative; inset: auto; width: 100%; padding: 8px; gap: 6px; }
+.actions-wrapper { gap: 8px; }
+.action-btn { min-width: 85px; padding: 8px 12px; }
+.raise-container { padding: 6px; gap: 8px; }
+.slider-row { min-width: 0; }
+
+@media (max-width: 760px) {
+  .app-header { height: auto; min-height: 56px; padding: 6px 10px; gap: 6px; flex-wrap: wrap; }
+  .logo-title { font-size: .9rem; }
+  .header-actions { gap: 4px; }
+  .btn-header { padding: 5px; font-size: .7rem; }
+  .round-indicator-pill { padding: 4px 8px; font-size: .65rem; }
+  .table-felt {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: 1fr 1.3fr 1fr;
+    grid-template-areas: 'left top right' 'center center center' 'bottom bottom bottom';
+    padding: 4px;
+  }
+  .seat-top { display: flex; gap: 5px; }
+  .seat { max-width: 100%; }
+  .seat-bottom { gap: 8px; }
+  .player-name, .player-chips { font-size: .7rem; }
+  .player-details { min-width: 65px; }
+  .poker-table { padding: 8px; border-radius: 70px; }
+  .table-felt { border-radius: 60px; }
+  .card, .card-slot { width: clamp(32px, 8vw, 48px); height: clamp(46px, 8dvh, 68px); }
+  .actions-wrapper { flex-wrap: wrap; gap: 5px; }
+  .raise-container { order: 2; width: 100%; justify-content: center; }
+  .hand-eval-preview { font-size: .7rem; padding: 3px 8px; }
+  .action-btn { padding: 5px 10px; min-width: 75px; }
+  .btn-icon, .btn-subtext { display: none; }
+  .btn-text { font-size: .8rem; }
+  .table-container { padding: 6px; gap: 6px; }
+}
+
+@media (max-height: 600px) and (min-width: 761px) {
+  .app-header { height: 44px; }
+  .player-avatar { width: 30px; height: 30px; }
+  .card, .card-slot { height: 50px; width: 36px; }
+  .card-center-suit { font-size: 1rem; }
+  .card-corner-bottom { display: none; }
+  .btn-icon, .btn-subtext { display: none; }
+  .table-felt { gap: 4px; padding: 4px; }
 }

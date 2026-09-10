@@ -485,7 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
         communityCards: document.getElementById('community-cards'),
         tableStatusMsg: document.getElementById('table-status-msg'),
         playerHandRank: document.getElementById('player-hand-rank'),
-        gameLog: document.getElementById('game-log'),
 
         // Botões de ação
         btnFold: document.getElementById('btn-fold'),
@@ -513,7 +512,6 @@ document.addEventListener('DOMContentLoaded', () => {
         soundStatus: document.getElementById('sound-status'),
         soundIcon: document.getElementById('sound-icon'),
         btnRestart: document.getElementById('btn-restart'),
-        btnClearLog: document.getElementById('btn-clear-log')
       };
 
       this.bindEvents();
@@ -615,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
         this.setBetInputValue(val);
       });
       this.dom.presetAllin.addEventListener('click', () => {
-        this.setBetInputValue(this.players[0].chips);
+        this.setBetInputValue(this.players[0].currentBet + this.players[0].chips);
       });
 
       // Modal de regras
@@ -639,24 +637,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      // Limpar histórico
-      this.dom.btnClearLog.addEventListener('click', () => {
-        this.dom.gameLog.innerHTML = '<div class="log-entry log-system">Histórico limpo.</div>';
-      });
     }
 
     setBetInputValue(amount) {
+      amount = Math.max(Number(this.dom.betInput.min), Math.min(Number(this.dom.betInput.max), amount));
       this.dom.betSlider.value = amount;
       this.dom.betInput.value = amount;
     }
 
     // Registra eventos no painel de histórico lateral
     addLog(message, type = 'normal') {
-      const entry = document.createElement('div');
-      entry.className = `log-entry log-${type}`;
-      entry.textContent = message;
-      this.dom.gameLog.appendChild(entry);
-      this.dom.gameLog.scrollTop = this.dom.gameLog.scrollHeight;
+      // O histórico visual foi removido; as mensagens continuam disponíveis no console.
+      console.debug(`[${type}] ${message}`);
     }
 
     // Restaura fichas e zera a mesa
@@ -839,6 +831,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Transição entre as rodadas de apostas (Flop, Turn, River, Showdown)
     nextRoundStage() {
+      const activePlayers = this.players.filter(p => !p.folded);
+      if (activePlayers.length === 1) {
+        this.awardPotToWinner(activePlayers[0], 'Todos os outros desistiram.');
+        return;
+      }
+      // Não procure um próximo apostador quando só restam jogadores em all-in.
+      if (activePlayers.filter(p => !p.allIn).length <= 1) {
+        this.runRemainingCardsToShowdown();
+        return;
+      }
       // Recolhe as apostas individuais para o pote principal e zera currentBet da rodada
       this.players.forEach(p => {
         p.currentBet = 0;
@@ -926,6 +928,9 @@ document.addEventListener('DOMContentLoaded', () => {
        ------------------------------------------------------------------------ */
     handlePlayerAction(actionType, raiseValue = 0) {
       const player = this.players[0];
+      if (this.activeTurnIndex !== 0 || player.folded || player.allIn ||
+          this.gameStage === 'IDLE' || this.gameStage === 'SHOWDOWN') return;
+      this.disablePlayerControls();
       const callDiff = this.currentBet - player.currentBet;
 
       if (actionType === 'FOLD') {
@@ -956,7 +961,8 @@ document.addEventListener('DOMContentLoaded', () => {
         this.advanceToNextPlayer();
 
       } else if (actionType === 'RAISE') {
-        const totalTargetBet = raiseValue;
+        const maxTarget = player.currentBet + player.chips;
+        const totalTargetBet = Math.min(maxTarget, Math.max(this.currentBet + this.minRaise, Number(raiseValue) || 0));
         const additionalChips = totalTargetBet - player.currentBet;
         const actualPaid = Math.min(player.chips, additionalChips);
 
@@ -1292,8 +1298,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Configuração do botão e slider de Aumento (Raise / Bet)
-      const minRaiseTarget = Math.min(user.chips, this.currentBet + this.minRaise);
-      const maxRaiseTarget = user.chips;
+      const maxRaiseTarget = user.currentBet + user.chips;
+      const minRaiseTarget = Math.min(maxRaiseTarget, this.currentBet + this.minRaise);
 
       if (user.chips > callDiff && maxRaiseTarget >= minRaiseTarget) {
         this.dom.btnRaise.disabled = false;
