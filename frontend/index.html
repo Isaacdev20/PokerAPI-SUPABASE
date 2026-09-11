@@ -6,6 +6,7 @@
   Textos podem ser editados aqui; mantenha os IDs usados pelo JavaScript.
 -->
 <html lang="pt-BR">
+
 <head>
   <!-- UTF-8 permite acentos e naipes; viewport adapta a largura aos celulares. -->
   <meta charset="UTF-8">
@@ -14,6 +15,7 @@
   <!-- Altere o título acima para mudar o nome exibido na aba do navegador. -->
   <link rel="stylesheet" href="login.css">
 </head>
+
 <body>
   <main class="login-page">
     <!-- Marca: aria-label fornece o nome acessível; o naipe é apenas decorativo. -->
@@ -36,13 +38,16 @@
           autocapitalize e spellcheck evitam corrigir automaticamente o usuário.
         -->
         <label for="username">Nome de usuário</label>
-        <input id="username" name="username" type="text" placeholder="Digite seu usuário" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="50">
+        <input id="username" name="username" type="text" placeholder="Digite seu usuário" autocomplete="username"
+          autocapitalize="none" spellcheck="false" required maxlength="50">
 
         <label for="password">Senha</label>
         <div class="password-field">
           <!-- type="password" mascara o texto visualmente; não autentica nem criptografa dados. -->
-          <input id="password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required>
-          <button class="show-password" id="show-password" type="button" aria-label="Mostrar senha" aria-controls="password" aria-pressed="false">Mostrar</button>
+          <input id="password" name="password" type="password" placeholder="Digite sua senha"
+            autocomplete="current-password" required>
+          <button class="show-password" id="show-password" type="button" aria-label="Mostrar senha"
+            aria-controls="password" aria-pressed="false">Mostrar</button>
           <!-- type="button" evita enviar o formulário; aria-pressed indica se a senha está visível. -->
         </div>
 
@@ -60,32 +65,8 @@
     <p class="status-message" id="status-message" role="status" aria-live="polite"></p>
     <div class="suits" aria-hidden="true">♠ <span>♥</span> ♣ <span>♦</span></div>
   </main>
-  <script>
-    // Executado depois do HTML: os campos e botões já existem no documento (DOM).
-    // Guardamos as referências para não precisar procurar os elementos a cada clique.
-    const password = document.getElementById('password');
-    const toggle = document.getElementById('show-password');
-    const status = document.getElementById('status-message');
-    toggle.addEventListener('click', () => {
-      // visible será true quando a senha estiver oculta e precisar ser mostrada.
-      const visible = password.type === 'password';
-      // Operador ternário: condição ? valor quando verdadeira : valor quando falsa.
-      password.type = visible ? 'text' : 'password';
-      toggle.textContent = visible ? 'Ocultar' : 'Mostrar';
-      // Mantém a descrição acessível e o estado do botão sincronizados com a aparência.
-      toggle.setAttribute('aria-label', visible ? 'Ocultar senha' : 'Mostrar senha');
-      toggle.setAttribute('aria-pressed', String(visible));
-    });
-    document.getElementById('login-form').addEventListener('submit', event => {
-      // Cancela o envio padrão: não recarrega a página nem coloca as credenciais na URL.
-      event.preventDefault();
-      // Prévia visual: não salva senha, não chama Supabase e não libera acesso ao jogo.
-      status.textContent = 'Esta é uma prévia da tela. O login ainda não está disponível.';
-    });
-    document.getElementById('create-account').addEventListener('click', () => {
-      // Ponto de alteração futura para abrir uma tela de cadastro. Hoje só exibe um aviso.
-      status.textContent = 'A criação de contas ainda não está disponível nesta prévia.';
-    });
-  </script>
+  <script type="module" src="./src/login.js"></script>
+
 </body>
+
 </html>
