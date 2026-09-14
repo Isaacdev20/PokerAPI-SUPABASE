@@ -18,8 +18,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Folha de estilos do jogo -->
-  <link rel="stylesheet" href="style.css">
+  <!-- Folha de estilos do jogo (Renomeado para forçar atualização do cache) -->
+  <link rel="stylesheet" href="poker_style.css">
 </head>
 <body>
 
@@ -60,41 +60,41 @@
     <!-- A MESA DE POKER (Formato Oval com Feltro Verde de Cassino) -->
     <div class="poker-table" id="poker-table">
       
-      <!-- Borda de madeira e linha guia interna da mesa -->
-      <div class="table-felt">
-        <div class="table-inner-ring"></div>
+      <!-- Feltro da mesa: cobre todo o grid como fundo absoluto -->
+      <div class="table-felt felt-green" id="table-felt"></div>
 
-        <!-- ------------------------------------------------------------- -->
-        <!-- ÁREA CENTRAL DA MESA: Cartas Comunitárias e Pote             -->
-        <!-- ------------------------------------------------------------- -->
-        <div class="center-area">
-          
-          <!-- Pote acumulado da rodada -->
-          <div class="pot-display" id="pot-display">
+      <!-- ------------------------------------------------------------- -->
+      <!-- ÁREA CENTRAL DA MESA: Cartas Comunitárias e Pote             -->
+      <!-- ------------------------------------------------------------- -->
+      <div class="center-area">
+        
+        <!-- Pote acumulado da rodada -->
+        <div class="pot-display-wrapper" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100px;">
+          <div class="visual-chip-stack" id="visual-chip-stack"></div>
+          <div class="pot-display" id="pot-display" style="margin-top: 10px;">
             <span class="pot-icon">🪙</span>
             <div class="pot-info">
               <span class="pot-label">POTE TOTAL</span>
               <span class="pot-value" id="pot-amount">$0</span>
             </div>
           </div>
+        </div>
 
-          <!-- As 5 Cartas Comunitárias (Flop 1, 2, 3; Turn; River) -->
-          <div class="community-cards" id="community-cards">
-            <div class="card-slot" id="flop-1"><span class="slot-label">Flop 1</span></div>
-            <div class="card-slot" id="flop-2"><span class="slot-label">Flop 2</span></div>
-            <div class="card-slot" id="flop-3"><span class="slot-label">Flop 3</span></div>
-            <div class="card-slot" id="turn"><span class="slot-label">Turn</span></div>
-            <div class="card-slot" id="river"><span class="slot-label">River</span></div>
-          </div>
+        <!-- As 5 Cartas Comunitárias (Flop 1, 2, 3; Turn; River) -->
+        <div class="community-cards" id="community-cards">
+          <div class="card-slot" id="flop-1"><span class="slot-label">Flop 1</span></div>
+          <div class="card-slot" id="flop-2"><span class="slot-label">Flop 2</span></div>
+          <div class="card-slot" id="flop-3"><span class="slot-label">Flop 3</span></div>
+          <div class="card-slot" id="turn"><span class="slot-label">Turn</span></div>
+          <div class="card-slot" id="river"><span class="slot-label">River</span></div>
+        </div>
 
-          <!-- Mensagem central de status da mesa (Ex: "Aguardando apostas...") -->
-          <div class="table-status-message" id="table-status-msg">
-            Bem-vindo à mesa! Clique em "Nova Mão" para jogar.
-          </div>
+        <!-- Mensagem central de status da mesa (Ex: "Aguardando apostas...") -->
+        <div class="table-status-message" id="table-status-msg">
+          Bem-vindo à mesa! Clique em "Nova Mão" para jogar.
+        </div>
 
-        </div> <!-- Fim .center-area -->
-
-        <!-- ------------------------------------------------------------- -->
+      </div> <!-- Fim .center-area -->
         <!-- ASSENTOS DOS JOGADORES (1 Jogador Humano e 3 Bots de IA)     -->
         <!-- ------------------------------------------------------------- -->
 
@@ -116,11 +116,8 @@
             <span class="player-name" id="name-1">Sofia</span>
             <span class="player-chips" id="chips-1">$1.000</span>
           </div>
-          <!-- Cartas do Bot (fechadas até o Showdown) -->
-          <div class="player-cards" id="cards-1">
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-          </div>
+          <!-- Cartas do Bot: geradas dinamicamente pelo JS a cada nova mão -->
+          <div class="player-cards" id="cards-1"></div>
           <!-- Aposta atual feita na rodada -->
           <div class="player-bet-chip" id="bet-1" style="display: none;">$0</div>
           <!-- Balão com a última ação do jogador (ex: "Check", "Fold", "Raise") -->
@@ -138,10 +135,8 @@
             <span class="player-name" id="name-2">Lucas</span>
             <span class="player-chips" id="chips-2">$1.000</span>
           </div>
-          <div class="player-cards" id="cards-2">
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-          </div>
+          <!-- Cartas do Bot: geradas dinamicamente pelo JS a cada nova mão -->
+          <div class="player-cards" id="cards-2"></div>
           <div class="player-bet-chip" id="bet-2" style="display: none;">$0</div>
           <div class="player-action-bubble" id="action-2" style="display: none;"></div>
         </div>
@@ -157,10 +152,8 @@
             <span class="player-name" id="name-3">Elena</span>
             <span class="player-chips" id="chips-3">$1.000</span>
           </div>
-          <div class="player-cards" id="cards-3">
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-          </div>
+          <!-- Cartas do Bot: geradas dinamicamente pelo JS a cada nova mão -->
+          <div class="player-cards" id="cards-3"></div>
           <div class="player-bet-chip" id="bet-3" style="display: none;">$0</div>
           <div class="player-action-bubble" id="action-3" style="display: none;"></div>
         </div>
@@ -184,8 +177,10 @@
           <div class="player-action-bubble" id="action-0" style="display: none;"></div>
         </div>
 
-      </div> <!-- Fim .table-felt -->
+      <!-- Fim dos Assentos -->
     </div> <!-- Fim .poker-table -->
+
+  </main>
 
     <!-- =============================================================== -->
     <!-- PAINEL DE CONTROLE DO JOGADOR (Ações e Apostas)                 -->
@@ -200,20 +195,6 @@
 
       <!-- Barra de controles de aposta -->
       <div class="actions-wrapper">
-
-        <!-- Botão: Desistir da mão atual (Fold) -->
-        <button id="btn-fold" class="action-btn btn-fold" disabled>
-          <span class="btn-icon">✖</span>
-          <span class="btn-text">Desistir</span>
-          <span class="btn-subtext">Fold</span>
-        </button>
-
-        <!-- Botão: Passar a vez (Check) ou Pagar a aposta (Call) -->
-        <button id="btn-check-call" class="action-btn btn-check" disabled>
-          <span class="btn-icon">✔</span>
-          <span class="btn-text" id="label-check-call">Mesa</span>
-          <span class="btn-subtext" id="subtext-check-call">Check</span>
-        </button>
 
         <!-- Área de Aumento / Aposta (Raise / Bet) -->
         <div class="raise-container">
@@ -245,6 +226,20 @@
           </button>
         </div>
 
+        <!-- Botão: Passar a vez (Check) ou Pagar a aposta (Call) -->
+        <button id="btn-check-call" class="action-btn btn-check" disabled>
+          <span class="btn-icon">✔</span>
+          <span class="btn-text" id="label-check-call">Mesa</span>
+          <span class="btn-subtext" id="subtext-check-call">Check</span>
+        </button>
+
+        <!-- Botão: Desistir da mão atual (Fold) -->
+        <button id="btn-fold" class="action-btn btn-fold" disabled>
+          <span class="btn-icon">✖</span>
+          <span class="btn-text">Desistir</span>
+          <span class="btn-subtext">Fold</span>
+        </button>
+
         <!-- Botão de Iniciar Próxima Mão (visível entre mãos) -->
         <button id="btn-next-hand" class="action-btn btn-next-hand">
           <span class="btn-icon">▶</span>
@@ -256,7 +251,7 @@
     </section>
 
 
-  </main>
+
 
   <!-- ================================================================= -->
   <!-- MODAL INFORMATIVO: Regras do Jogo e Classificação das Mãos        -->

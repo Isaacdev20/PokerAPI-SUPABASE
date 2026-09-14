@@ -703,9 +703,11 @@ document.addEventListener('DOMContentLoaded', () => {
        INÍCIO DE UMA NOVA MÃO
        ------------------------------------------------------------------------ */
     startNewHand() {
+      // O fundo agora é gerado puramente por CSS (animado) para evitar erros de hotlinking (403 Forbidden).
       // Diferente de reiniciar: mantém os saldos e prepara apenas cartas/apostas da nova mão.
       // Remove destaques de cartas vencedoras anteriores
       document.querySelectorAll('.card').forEach(c => c.classList.remove('winning-card'));
+      document.querySelectorAll('.seat').forEach(s => s.classList.remove('winner-anim'));
 
       // Verifica se o jogador humano tem fichas; caso tenha perdido tudo, concede recarga
       if (this.players[0].chips <= 0) {
@@ -727,6 +729,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Limpa balão de ação
         const bubble = document.getElementById(`action-${p.id}`);
         if (bubble) bubble.style.display = 'none';
+        // Limpa cartas visuais de TODOS os jogadores para evitar "cartas fantasma"
+        const cardsContainer = document.getElementById(`cards-${p.id}`);
+        if (cardsContainer) cardsContainer.innerHTML = '';
       });
 
       this.deck.reset();
@@ -1146,7 +1151,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (p.isBot && !p.folded) {
           const cardsContainer = document.getElementById(`cards-${p.id}`);
           cardsContainer.innerHTML = '';
-          p.cards.forEach(card => cardsContainer.appendChild(card.renderHTML(false)));
+          p.cards.forEach((card, idx) => {
+            const cardEl = card.renderHTML(false);
+            cardEl.classList.add('animate-deal');
+            cardEl.style.animationDelay = `${idx * 150}ms`;
+            cardsContainer.appendChild(cardEl);
+          });
         }
       });
 
@@ -1169,6 +1179,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const winningHandName = winners[0].evaluation.name;
 
       winners.forEach(w => {
+        document.getElementById(`seat-${w.player.id}`).classList.add('winner-anim');
         w.player.chips += splitShare;
       });
 
@@ -1201,6 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Entrega o pote quando todos os outros deram fold
     awardPotToWinner(winner, reason) {
       this.disablePlayerControls();
+      document.getElementById(`seat-${winner.id}`).classList.add('winner-anim');
       winner.chips += this.pot;
       this.addLog(`🏆 ${winner.name} levou o pote de $${this.pot}! (${reason})`, 'win');
       this.dom.tableStatusMsg.innerHTML = `🏆 <strong>${winner.name}</strong> venceu o pote ($${this.pot})!`;
@@ -1229,8 +1241,31 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       this.dom.currentRoundName.textContent = stageNames[this.gameStage] || this.gameStage;
 
-      // 2. Atualiza Pote Total
+      // 2. Atualiza Pote Total e a Pilha Visual de Fichas
       this.dom.potAmount.textContent = `$${this.pot.toLocaleString('pt-BR')}`;
+      
+      const chipStackContainer = document.getElementById('visual-chip-stack');
+      if (chipStackContainer) {
+        // Quantidade de fichas visuais: 1 ficha para cada $50, máximo de 15 fichas para não quebrar o layout
+        const chipCount = Math.min(15, Math.floor(this.pot / 50));
+        
+        // Só redesenha se a quantidade de fichas mudou
+        if (chipStackContainer.children.length !== chipCount) {
+          chipStackContainer.innerHTML = '';
+          for (let i = 0; i < chipCount; i++) {
+            const chip = document.createElement('div');
+            chip.className = 'visual-chip';
+            // Variação de cor baseada na altura da pilha
+            if (i % 5 === 0) chip.style.backgroundColor = '#d32f2f'; // Vermelha
+            else if (i % 2 === 0) chip.style.backgroundColor = '#1976d2'; // Azul
+            else chip.style.backgroundColor = '#388e3c'; // Verde
+            
+            // Pequeno atraso na animação para efeito de queda em cascata
+            chip.style.animationDelay = `${i * 50}ms`;
+            chipStackContainer.appendChild(chip);
+          }
+        }
+      }
 
       // 3. Atualiza os assentos dos 4 jogadores
       this.players.forEach(p => {
@@ -1269,24 +1304,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 4. Renderiza as cartas do Jogador Humano
       const userCardsContainer = document.getElementById('cards-0');
-      userCardsContainer.innerHTML = '';
-      this.players[0].cards.forEach(c => {
-        userCardsContainer.appendChild(c.renderHTML(false));
-      });
+      if (userCardsContainer.children.length !== this.players[0].cards.length) {
+        userCardsContainer.innerHTML = '';
+        this.players[0].cards.forEach((c, idx) => {
+          const cardEl = c.renderHTML(false);
+          cardEl.classList.add('animate-deal');
+          cardEl.style.animationDelay = `${idx * 150}ms`;
+          userCardsContainer.appendChild(cardEl);
+        });
+      }
 
       // Renderiza as cartas dos Bots (fechadas a não ser que estejamos no Showdown)
       this.players.forEach(p => {
         if (p.isBot) {
           const botCardsContainer = document.getElementById(`cards-${p.id}`);
           if (botCardsContainer && this.gameStage !== 'SHOWDOWN') {
-            botCardsContainer.innerHTML = '';
-            if (p.cards.length > 0 && !p.folded) {
-              const card1 = document.createElement('div');
-              card1.className = 'card card-back';
-              const card2 = document.createElement('div');
-              card2.className = 'card card-back';
-              botCardsContainer.appendChild(card1);
-              botCardsContainer.appendChild(card2);
+            const expectedCards = (p.cards.length > 0 && !p.folded) ? 2 : 0;
+            if (botCardsContainer.children.length !== expectedCards) {
+              botCardsContainer.innerHTML = '';
+              if (expectedCards > 0) {
+                const card1 = document.createElement('div');
+                card1.className = 'card card-back animate-deal';
+                const card2 = document.createElement('div');
+                card2.className = 'card card-back animate-deal';
+                card2.style.animationDelay = '150ms';
+                botCardsContainer.appendChild(card1);
+                botCardsContainer.appendChild(card2);
+              }
             }
           }
         }
@@ -1296,9 +1340,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const slots = ['flop-1', 'flop-2', 'flop-3', 'turn', 'river'];
       slots.forEach((slotId, index) => {
         const slotEl = document.getElementById(slotId);
-        slotEl.innerHTML = '';
+        const hasCard = slotEl.querySelector('.card');
         if (this.communityCards[index]) {
-          slotEl.appendChild(this.communityCards[index].renderHTML(false));
+          if (!hasCard) {
+            slotEl.innerHTML = '';
+            const cardEl = this.communityCards[index].renderHTML(false);
+            cardEl.classList.add('animate-deal');
+            slotEl.appendChild(cardEl);
+          }
         } else {
           slotEl.innerHTML = `<span class="slot-label">${slotId.replace('-', ' ')}</span>`;
         }

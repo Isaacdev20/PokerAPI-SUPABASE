@@ -11,3 +11,4 @@ Modelo para novos registros:
 - Situação: pendente, em andamento ou resolvido após conferir.
 
 ANOTAÇÕES DO PROJETO
+ pedir para iniciar a fase 5

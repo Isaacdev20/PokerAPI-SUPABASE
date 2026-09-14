@@ -22,11 +22,24 @@ body {
   /* Gradiente cria a iluminação verde atrás do formulário, sem arquivo de imagem. */
   background: radial-gradient(ellipse at 50% 35%, #173c2b 0%, #0c1c14 42%, #070e0b 80%);
 }
+
+.dotted-surface-bg {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+}
+
 /* Controles usam a mesma fonte do restante da página. */
 button, input { font: inherit; }
 button { cursor: pointer; }
 /* Coluna centralizada; min-height permite rolagem caso uma tela curta exija mais espaço. */
 .login-page {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;

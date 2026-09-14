@@ -1,6 +1,15 @@
 // Arquivo: frontend/src/login.js
 import { signIn, signUp } from './services/auth.js';
+import { initDottedSurface } from './dotted-surface.js';
+
 console.log("O login.js carregou com sucesso!");
+
+// Inicia o fundo animado
+initDottedSurface('dotted-surface-container', {
+    theme: 'dark',
+    size: 6,
+    opacity: 0.6
+});
 
 
 // Pegamos os elementos HTML da tela

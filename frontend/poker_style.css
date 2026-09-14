@@ -1,0 +1,1178 @@
+/* ==========================================================================
+   TEXAS HOLD'EM POKER - ESTILOS VISUAIS (style.css)
+   Aesthetic: PIXEL ART, DYNAMIC BACKGROUNDS, NO PURPLE
+   Layout: STRICT CSS GRID (Zero Overlap)
+   ========================================================================== */
+
+:root {
+  --color-cyan: #00ffff;
+  --color-magenta: #ff00ff;
+  --color-yellow: #ffff00;
+  --color-lime: #00ff00;
+  --color-orange: #ff5500;
+
+  --font-sans: 'Courier New', Courier, monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: #fff;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  /* Gradiente verde floresta -> preto, rico e profundo */
+  background-color: #021408;
+  background-image:
+    radial-gradient(ellipse at 50% 30%, #1a5c2e 0%, #0a3018 30%, #042010 60%, #010a05 85%, #000000 100%);
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* Fundo Animado estilo Dotted/Starfield em puro CSS */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.8), rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 40px 70px, rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 50px 160px, rgba(0, 255, 255, 0.5), rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.8), rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 130px 80px, rgba(255, 0, 255, 0.5), rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 160px 120px, rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  animation: starsAnim 60s linear infinite;
+  opacity: 0.6;
+}
+
+@keyframes starsAnim {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: -200px 200px;
+  }
+}
+
+/* Estilos para a pilha de fichas visual ao lado do pote */
+.visual-chip-stack {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  /* Cresce de baixo para cima */
+  align-items: center;
+  justify-content: flex-start;
+  width: 50px;
+  height: 50px;
+  /* Altura fixa para não empurrar os elementos */
+  margin-bottom: 10px;
+  z-index: 90;
+}
+
+.visual-chip {
+  width: 46px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  margin-top: -10px;
+  /* Sobreposição forte */
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.8), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+  position: relative;
+  flex-shrink: 0;
+  animation: chipDropAnim 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+}
+
+.visual-chip::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+}
+
+@keyframes chipDropAnim {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Overlay muito leve para não matar o gradiente do fundo */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.15); /* Reduzido de 0.6 para 0.15 */
+}
+
+@keyframes bgDitherAnim {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50px;
+  pointer-events: none;
+  z-index: 2;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.1;
+  mix-blend-mode: overlay;
+  animation: bgDitherAnim 8s ease-in-out infinite;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER
+   -------------------------------------------------------------------------- */
+.app-header {
+  height: 60px;
+  background: rgba(0, 0, 0, 0.8);
+  border-bottom: 4px solid var(--color-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 200;
+  position: relative;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  color: var(--color-cyan);
+  font-size: 1.8rem;
+  text-shadow: 2px 2px 0px var(--color-magenta);
+}
+
+.logo-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0px #000;
+}
+
+.round-indicator-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #000;
+  border: 2px solid var(--color-yellow);
+  padding: 4px 12px;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--color-yellow);
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-lime);
+  border: 1px solid #000;
+  animation: blinkRetro 1s steps(2, start) infinite;
+}
+
+@keyframes blinkRetro {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-header {
+  background: #000;
+  border: 2px solid var(--color-cyan);
+  color: var(--color-cyan);
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-weight: 900;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  box-shadow: 2px 2px 0px var(--color-cyan);
+}
+
+.btn-header:hover {
+  background: var(--color-cyan);
+  color: #000;
+}
+
+/* ============================================================
+   MESA DE JOGO — LAYOUT DEFINITIVO
+   Mesa: 960×680px. Posicionamento absoluto preciso.
+   Zoom responsivo mantém proporcoes sem quebrar o layout.
+   ============================================================ */
+.table-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+}
+
+.poker-table {
+  position: relative;
+  width: 960px;
+  height: 680px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+/* Zoom responsivo — afeta layout (diferente de transform:scale) */
+@media (max-width: 980px)  { .poker-table { zoom: 0.85; } }
+@media (max-width: 830px)  { .poker-table { zoom: 0.70; } }
+@media (max-width: 690px)  { .poker-table { zoom: 0.55; } }
+
+/* ============================================================
+   FELTRO OVAL
+   top:130 / bottom:100 deixa 130px no topo para Lucas
+   e 100px na base para o Jogador.
+   left:160 / right:160 deixa espaço para Sofia e Elena.
+   ============================================================ */
+.table-felt {
+  position: absolute;
+  top: 130px; bottom: 100px;
+  left: 160px; right: 160px;
+  background-color: #0d4a22;
+  background-image:
+    linear-gradient(45deg, #093818 25%, transparent 25%, transparent 75%, #093818 75%, #093818),
+    linear-gradient(45deg, #093818 25%, transparent 25%, transparent 75%, #093818 75%, #093818);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+  border: 12px solid #2a1610;
+  border-radius: 200px;
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.8),
+    inset 0 0 40px rgba(0,0,0,0.9),
+    inset 0 0 0 4px var(--color-lime);
+  z-index: 1;
+}
+
+.table-felt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 188px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+}
+
+.table-inner-ring { display: none; }
+
+/* ============================================================
+   ÁREA CENTRAL — Pote + Cartas comunitárias + Status
+   Centrada na mesa. gap compacto para caber verticalmente.
+   ============================================================ */
+.center-area {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 80;
+}
+
+/* Pot display menor */
+.pot-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #000;
+  border: 2px solid var(--color-yellow);
+  padding: 6px 16px;
+  box-shadow: 4px 4px 0px rgba(255,255,0,0.4);
+}
+.pot-icon { font-size: 1.1rem; color: var(--color-yellow); }
+.pot-info { display: flex; flex-direction: column; line-height: 1.2; }
+.pot-label { font-size: 0.7rem; color: var(--color-yellow); font-weight: 900; }
+.pot-value { font-size: 1.3rem; font-weight: 900; color: #fff; }
+.val-highlight { animation: textPop 0.2s steps(2,start); }
+@keyframes textPop { 50% { color: var(--color-yellow); transform: scale(1.1); } }
+
+.community-cards { display: flex; gap: 8px; }
+
+/* Slots das cartas comunitárias (levemente menores para economizar espaço) */
+.card-slot {
+  width: 62px; height: 88px;
+  border: 2px dashed #fff;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.5);
+}
+.slot-label { font-size: 0.65rem; color: #fff; font-weight: 900; }
+
+/* Status message: filho flex normal do center-area (NAO position:absolute) */
+.table-status-message {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(0,0,0,0.8);
+  padding: 5px 16px;
+  border: 2px solid var(--color-cyan);
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,255,255,0.2);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   ASSENTOS — POSICIONAMENTO ABSOLUTO NA MESA 960x680
+   
+   Margens calculadas para NUNCA sobrepor o center-area:
+   - Lucas (topo): ocupa 10px→10+50+6+34+6+65=171px
+   - Center-area: top~240px, bottom~440px
+   - Você (base): cards começam em ~480px (680-200=480)
+   - Sofia/Elena: width ~160px cada, left/right 10px
+   ============================================================ */
+.seat {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+/* BOT TOPO (Lucas) — avatar+name em cima, cartas descem para a mesa */
+.seat-top {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* JOGADOR (Você) — cartas em cima, avatar embaixo (column-reverse) */
+.seat-bottom {
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 4px;
+}
+
+/* BOT ESQUERDA (Sofia) — avatar | details | cards (da esq para dir) */
+.seat-left {
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+/* BOT DIREITA (Elena) — cards | details | avatar (direita para esq) */
+.seat-right {
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 6px;
+}
+
+.seat.folded {
+  opacity: 0.3;
+  filter: grayscale(1);
+  pointer-events: none;
+}
+
+.player-badge {
+  position: absolute;
+  font-size: 0.9rem;
+  z-index: 20;
+}
+
+.seat-left .player-badge {
+  left: -10px;
+  top: -10px;
+}
+
+.seat-right .player-badge {
+  right: -10px;
+  top: -10px;
+}
+
+.seat.turn-active .player-avatar {
+  border-color: var(--color-orange);
+  background: var(--color-yellow);
+}
+
+.seat.turn-active .player-details {
+  background: var(--color-orange);
+  color: #000;
+  border-color: #fff;
+}
+
+.seat.turn-active .player-name,
+.seat.turn-active .player-chips {
+  color: #000;
+}
+
+.player-avatar {
+  width: 50px;
+  height: 50px;
+  background: #000;
+  border: 4px solid var(--color-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 5;
+}
+
+.avatar-emoji {
+  font-size: 1.6rem;
+}
+
+.dealer-button {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  color: #000;
+  font-weight: 900;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.player-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #000;
+  padding: 4px 8px;
+  border: 2px solid var(--color-cyan);
+  z-index: 5;
+  min-width: 80px;
+}
+
+.player-name {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: var(--color-cyan);
+}
+
+.player-chips {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+/* Fichas Ocultadas a pedido do usuário ("tire as fichas") */
+.player-bet-chip {
+  display: none !important;
+}
+
+.chip-move {
+  animation: chipDrop 0.2s linear forwards;
+}
+
+@keyframes chipDrop {
+  to {
+    opacity: 0;
+  }
+}
+
+.player-action-bubble {
+  position: absolute;
+  top: 0;
+  background: #fff;
+  color: #000;
+  border: 2px solid #000;
+  font-size: 0.8rem;
+  font-weight: 900;
+  padding: 4px 8px;
+  z-index: 50;
+}
+
+.anim-allin {
+  animation: allInFlash 0.4s steps(2, start) infinite;
+}
+
+@keyframes allInFlash {
+  0% {
+    background: var(--color-magenta);
+    color: #fff;
+  }
+
+  100% {
+    background: var(--color-yellow);
+    color: #000;
+  }
+}
+
+/* ============================================================
+   CARTAS: TAMANHOS POR CONTEXTO
+   Cartas dos bots menores para caber sem sobrepor o centro.
+   ============================================================ */
+
+/* Cartas comunitárias: 62x88 (compactas mas legíveis) */
+.community-cards .card,
+.community-cards .card-flip-container { width: 62px; height: 88px; }
+
+/* Suas cartas (jogador humano): maiores para visibilidade */
+.seat-human .player-cards { display: flex; gap: 8px; z-index: 10; }
+.seat-human .card,
+.seat-human .card-flip-container { width: 80px; height: 112px; }
+
+/* Cartas dos bots: menores para caber dentro da área do assento */
+.seat-bot .player-cards { display: flex; gap: 4px; z-index: 10; }
+.seat-bot .card,
+.seat-bot .card-flip-container { width: 52px; height: 72px; }
+
+.card-flip-container {
+  perspective: 1000px;
+  background: transparent;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.2s linear;
+  transform-style: preserve-3d;
+}
+
+.card-flip-container.revealed .card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-front,
+.flip-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.flip-front {
+  transform: rotateY(180deg);
+}
+
+/* Borda grossa preta, fundo branco, estilo blocos */
+.card {
+  position: relative;
+  /* <-- Essencial para o naipe central não voar para fora */
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px;
+  border: 4px solid #000;
+  color: #000;
+  box-shadow: inset -2px -2px 0px rgba(0, 0, 0, 0.2);
+  /* Sombra interna para dar volume 8bit */
+}
+
+.card.suit-hearts,
+.card.suit-diamonds {
+  color: #ff0000;
+}
+
+.card.suit-clubs,
+.card.suit-spades {
+  color: #000000;
+}
+
+.card-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.card-val {
+  white-space: nowrap;
+  letter-spacing: -1px;
+}
+
+/* Evita que o '10' quebre de linha */
+.seat-bot .card-val {
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.community-cards .card-val {
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.seat-human .card-val {
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.card-icon {
+  font-size: 1em;
+  text-shadow: none;
+}
+
+.card-center-suit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2em;
+}
+
+.seat-bot .card-center-suit {
+  display: none;
+}
+
+/* Oculta para não embolar em cartas pequenas */
+.card-corner-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  transform: rotate(180deg);
+}
+
+.card.card-back {
+  background: var(--color-cyan);
+  background-image: repeating-linear-gradient(45deg, #000 0, #000 4px, transparent 4px, transparent 8px);
+  border: 4px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card.card-back::after {
+  content: "?";
+  color: #fff;
+  font-size: 1.5em;
+  font-weight: 900;
+  background: #000;
+  padding: 2px;
+}
+
+.animate-deal {
+  animation: dealSlide 0.3s steps(5, end) backwards;
+}
+
+@keyframes dealSlide {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes winnerJump {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px) scale(1.1);
+  }
+}
+
+.winner-anim .player-avatar {
+  animation: winnerJump 0.4s steps(2, start) infinite;
+  border-color: var(--color-lime) !important;
+  background: var(--color-lime) !important;
+  box-shadow: 0 0 10px var(--color-lime);
+}
+
+.winner-anim .player-details {
+  background: var(--color-lime) !important;
+  border-color: #000 !important;
+}
+
+.winner-anim .player-name,
+.winner-anim .player-chips {
+  color: #000 !important;
+}
+
+.anim-fold {
+  animation: foldAway 0.2s linear forwards;
+}
+
+@keyframes foldAway {
+  to {
+    opacity: 0;
+    filter: grayscale(1);
+  }
+}
+
+.card.winning-card {
+  border-color: var(--color-lime);
+  box-shadow: 4px 4px 0px #000;
+  animation: winBlink 0.2s steps(2, start) infinite;
+  z-index: 60;
+}
+
+@keyframes winBlink {
+  0% {
+    background: #fff;
+  }
+
+  100% {
+    background: var(--color-lime);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   HUD DE CONTROLE (BOTÕES DE AÇÃO)
+   -------------------------------------------------------------------------- */
+/* ===============================================================
+   PAINEL DE CONTROLE DO JOGADOR
+   =============================================================== */
+.player-control-dock {
+  position: relative;
+  background: rgba(5, 5, 16, 0.95);
+  border-top: 4px solid var(--color-magenta);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 300;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.hand-eval-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 8px 24px;
+  border: 2px solid var(--color-cyan);
+  color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.eval-label {
+  color: #aaa;
+}
+
+.eval-result {
+  color: var(--color-cyan);
+  text-shadow: 0 0 10px var(--color-cyan);
+}
+
+.actions-wrapper {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  min-width: 140px;
+  font-family: var(--font-sans);
+  color: #fff;
+  background: #333;
+  box-shadow: 0px 6px 0px #000, 0px 8px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
+  pointer-events: none;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0px 10px 0px #000, 0px 15px 20px rgba(0, 0, 0, 0.6);
+  filter: brightness(1.2);
+}
+
+.action-btn:active:not(:disabled) {
+  transform: translateY(6px);
+  box-shadow: 0px 0px 0px #000, 0px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: 0px 4px 0px #000;
+  transform: translateY(2px);
+  filter: grayscale(0.8);
+}
+
+.btn-icon {
+  font-size: 1.6rem;
+  margin-bottom: 4px;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+}
+
+.btn-text {
+  font-weight: 900;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+}
+
+.btn-subtext {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 4px;
+}
+
+.btn-fold {
+  background: linear-gradient(to bottom, #d32f2f, #9a0007);
+  border-color: #5c0002;
+}
+
+.btn-check {
+  background: linear-gradient(to bottom, #0288d1, #01579b);
+  border-color: #003666;
+}
+
+.btn-raise {
+  background: linear-gradient(to bottom, #388e3c, #1b5e20);
+  border-color: #0d3810;
+}
+
+.btn-next-hand {
+  background: linear-gradient(to bottom, #fbc02d, #f57f17);
+  border-color: #c96b00;
+  color: #000;
+}
+
+.btn-next-hand .btn-subtext {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.btn-next-hand .btn-text,
+.btn-next-hand .btn-icon {
+  text-shadow: none;
+}
+
+.raise-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 12px 24px;
+  border: 2px solid var(--color-cyan);
+  border-radius: 16px;
+  box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.bet-presets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.preset-btn {
+  background: #111;
+  border: 2px solid #555;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 900;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.preset-btn:hover:not(:disabled) {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+.preset-allin {
+  border-color: var(--color-magenta);
+  color: var(--color-magenta);
+}
+
+.preset-allin:hover:not(:disabled) {
+  background: var(--color-magenta);
+  color: #fff;
+  border-color: var(--color-magenta);
+  box-shadow: 0 0 15px var(--color-magenta);
+}
+
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+#bet-slider {
+  -webkit-appearance: none;
+  width: 140px;
+  height: 8px;
+  background: #333;
+  outline: none;
+  border: 2px solid var(--color-cyan);
+}
+
+#bet-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 24px;
+  background: var(--color-yellow);
+  cursor: pointer;
+  border: 2px solid #000;
+}
+
+.bet-input-display {
+  display: flex;
+  align-items: center;
+  background: #000;
+  border: 2px solid var(--color-cyan);
+  padding: 4px 8px;
+}
+
+.currency-symbol {
+  color: var(--color-cyan);
+  font-weight: 900;
+  font-size: 1rem;
+  margin-right: 6px;
+}
+
+#bet-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 900;
+  width: 60px;
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   MODAL DE REGRAS
+   -------------------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-dialog {
+  background: #000;
+  border: 4px solid var(--color-magenta);
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 10px 0px var(--color-magenta);
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 4px solid var(--color-magenta);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-magenta);
+  color: #000;
+}
+
+.modal-header h2 {
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: #000;
+  font-size: 2rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.rules-section h3 {
+  color: var(--color-cyan);
+  margin-bottom: 12px;
+  margin-top: 20px;
+}
+
+.hand-rank-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #111;
+  padding: 12px;
+  border: 2px solid var(--color-cyan);
+  margin-bottom: 8px;
+}
+
+.rank-number {
+  background: var(--color-cyan);
+  color: #000;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.2rem;
+}
+
+.rank-info strong {
+  color: var(--color-yellow);
+  display: block;
+}
+
+.rank-sample {
+  margin-left: auto;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVIDADE (Escala do Grid)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .poker-table {
+    transform: scale(0.85);
+  }
+}
+
+@media (max-width: 900px) {
+  .poker-table {
+    transform: scale(0.65);
+  }
+
+  .actions-wrapper {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .action-btn {
+    flex: 1;
+    min-width: 110px;
+    padding: 10px;
+  }
+
+  .raise-container {
+    flex: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-header {
+    padding: 0 12px;
+  }
+
+  .logo-title {
+    display: none;
+  }
+
+  /* Mantemos o grid, apenas reduzimos a escala drasticamente para caber */
+  .poker-table {
+    transform: scale(0.45);
+  }
+
+  .player-control-dock {
+    padding: 10px;
+  }
+}
