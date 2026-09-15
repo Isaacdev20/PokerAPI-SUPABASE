@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranking — Royal Hold'em</title>
+  <link rel="stylesheet" href="login.css">
+  <style>
+    .ranking-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      z-index: 1;
+      position: relative;
+    }
+
+    .ranking-card {
+      background: rgba(20, 25, 30, 0.95);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .ranking-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+
+    .ranking-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .ranking-item:last-child {
+      border-bottom: none;
+    }
+
+    .ranking-pos {
+      font-weight: bold;
+      color: var(--gold-primary, #ffd700);
+      width: 30px;
+      display: inline-block;
+    }
+
+    .ranking-name {
+      flex: 1;
+      font-weight: 500;
+      margin-left: 10px;
+    }
+
+    .ranking-chips {
+      font-weight: 700;
+      color: var(--gold-primary, #ffd700);
+    }
+
+    .admin-controls {
+      display: none;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed rgba(255, 215, 0, 0.3);
+    }
+
+    .admin-controls.visible {
+      display: block;
+    }
+
+    .back-btn {
+      margin-top: 1.5rem;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .chip-edit-input {
+      width: 100px;
+      padding: 5px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #111;
+      color: #ffd700;
+      text-align: right;
+      font-weight: bold;
+    }
+
+    .save-btn {
+      background: var(--gold-primary, #ffd700);
+      color: #000;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+      font-size: 1rem;
+    }
+
+    .save-btn:hover {
+      background: #ffea00;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="dotted-surface-container" class="dotted-surface-bg"></div>
+  <main class="ranking-page">
+    <div class="brand" aria-label="Royal Hold'em">
+      <span class="brand-suit" aria-hidden="true">♠</span>
+      <span>ROYAL <strong>HOLD'EM</strong></span>
+    </div>
+
+    <section class="ranking-card">
+      <span class="eyebrow">HALL DA FAMA</span>
+      <h1 id="login-title">Ranking Global</h1>
+      <p class="intro">Os jogadores mais ricos da mesa.</p>
+
+      <div id="loading-msg" style="color: white; margin: 2rem 0;">Carregando jogadores...</div>
+
+      <ul class="ranking-list" id="ranking-list">
+        <!-- Itens inseridos via JS -->
+      </ul>
+
+
+
+      <a href="jogo.html" class="back-btn">Voltar para a Mesa</a>
+    </section>
+  </main>
+
+  <script type="module" src="./src/ranking.js"></script>
+</body>
+
+</html>

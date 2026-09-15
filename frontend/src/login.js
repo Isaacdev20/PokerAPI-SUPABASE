@@ -45,8 +45,11 @@ loginForm.addEventListener('submit', async (event) => {
 
         console.log("Token JWT da Sessão recebido:", data.session.access_token);
 
-        // Aqui no futuro vamos redirecionar para o jogo.html
-        // window.location.href = "jogo.html";
+        // Salva as credenciais e redireciona
+        localStorage.setItem('access_token', data.session.access_token);
+        localStorage.setItem('username', username);
+        window.location.href = "jogo.html";
+
 
     } catch (error) {
         statusMsg.textContent = "Erro ao entrar: " + error.message;
@@ -75,6 +78,12 @@ createAccountBtn.addEventListener('click', async () => {
 
         statusMsg.textContent = "Conta criada com sucesso! Agora clique em Entrar.";
         statusMsg.style.color = "lime";
+        // Auto-login após criar conta
+        const data = await signIn(username, password);
+        localStorage.setItem('access_token', data.session.access_token);
+        localStorage.setItem('username', username);
+        window.location.href = "jogo.html";
+
     } catch (error) {
         statusMsg.textContent = "Erro ao criar conta: " + error.message;
         statusMsg.style.color = "red";

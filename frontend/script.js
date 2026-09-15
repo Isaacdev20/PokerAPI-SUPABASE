@@ -18,29 +18,14 @@
 // Fluxo principal: PokerGame -> bindEvents -> startNewHand -> processTurn ->
 // advanceToNextPlayer -> nextRoundStage -> handleShowdown (ou awardPotToWinner).
 document.addEventListener('DOMContentLoaded', () => {
-  // Conexão com o SUPABASE 
-  // A URL base do projeto não deve conter "/rest/v1/" no final
-  const SUPABASE_URL = 'https://fojwtwzcnwwfjdfapuvd.supabase.co';
-  // Chave publicável usada no navegador, nunca uma chave secreta/service_role.
-  // Permissões de leitura/escrita precisam ser definidas no banco (RLS).
-  const SUPABASE_ANON_KEY = 'sb_publishable_afLlUxeI3Q-vem8qBwj_NA_eiGOgU_X';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // Consulta de diagnóstico da integração antiga do jogo; não autentica o usuário.
-  async function testarConexaoSupabase() {
-    const { data, error } = await supabase
-      .from('player_profiles') //Nome exato da sua tabela
-      .select('*') //Seleciona todas as colunas *
-
-    if (error) {
-      console.error('Erro ao conectar a Supabase', error.message);
-      return;
-    } else {
-      console.log('Conexao com Supabase estabelecida!', data);
-    }
+  // Verifica se o usuário está logado
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    window.location.href = "index.html";
+    return;
   }
-  testarConexaoSupabase();
-  //chama a funcao
+  const loggedUser = localStorage.getItem('username') || 'Jogador';
+
   /* ==========================================================================
      MÓDULO 1: SINTETIZADOR DE ÁUDIO (Web Audio API)
      Gera efeitos sonoros realistas por ondas matemáticas, funcionando 100% offline
@@ -468,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Alterar o número/ordem dos jogadores exige ajustar também os assentos de jogo.html.
       // Lista de 4 participantes: Jogador Humano (índice 0) e 3 Bots de IA
       this.players = [
-        { id: 0, name: 'Você', isBot: false, chips: 1000, cards: [], currentBet: 0, totalHandBet: 0, folded: false, allIn: false },
+        { id: 0, name: loggedUser, isBot: false, chips: 1000, cards: [], currentBet: 0, totalHandBet: 0, folded: false, allIn: false },
         { id: 1, name: 'Sofia', isBot: true, chips: 1000, cards: [], currentBet: 0, totalHandBet: 0, folded: false, allIn: false, style: 'equilibrada' },
         { id: 2, name: 'Lucas', isBot: true, chips: 1000, cards: [], currentBet: 0, totalHandBet: 0, folded: false, allIn: false, style: 'agressivo' },
         { id: 3, name: 'Elena', isBot: true, chips: 1000, cards: [], currentBet: 0, totalHandBet: 0, folded: false, allIn: false, style: 'cautelosa' }
@@ -529,68 +514,78 @@ document.addEventListener('DOMContentLoaded', () => {
       this.carregarDadosSupabase();
     }
     async carregarDadosSupabase() {
-      // async/await aguarda a consulta sem bloquear a interface.
-      // O perfil "teste" é fixo: ainda NÃO há associação com a tela de login.
-      // Perfis encontrados no banco substituem os valores iniciais do construtor.
-      if (!supabase) return;
-      //busca todos os jogadores da sua tabela
-      const { data, error } = await supabase
-        .from('player_profiles')
-        .select('*')
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
 
-      if (error) {
-        console.error('Erro ao buscar perfis', error.message);
-        return;
-      }
-      console.log('Perfis encontrados no Supabase:', data);
-      //atualiza o seu saldo com o que veio do banco ('teste')
-      const meuPerfil = data.find(p => p.username === 'teste');
-      if (meuPerfil) {
-        this.players[0].chips = meuPerfil.chips;
-        //coloca suas fichas no jogo
-        this.players[0].dbId = meuPerfil.id;
-        //guarda o ID do banco (1) para salvar depois
-      }
-      //atualiza o saldo dos bots 
-      ['Sofia', 'Lucas', 'Elena'].forEach((nomeBot, index) => {
-        const perfilBot = data.find(p => p.username === nomeBot);
-        if (perfilBot) {
-          this.players[index + 1].chips = perfilBot.chips;
-          this.players[index + 1].dbId = perfilBot.id;
+      try {
+        const response = await fetch('http://localhost:8000/api/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        if (!data.success) {
+          console.error('Erro ao buscar perfis:', data.detail);
+          return;
         }
-      });
-      //redesenha a mesa com os valores atualizados
-      this.updateUI();
 
+        console.log('Perfis recebidos do FastAPI:', data.profiles);
+
+        // Atualiza o nome visual e o saldo do jogador
+        this.players[0].name = data.username;
+        const meuPerfil = data.profiles.find(p => p.username === data.username);
+        if (meuPerfil) {
+          this.players[0].chips = meuPerfil.chips;
+        }
+
+        // Atualiza o saldo dos bots
+        ['Sofia', 'Lucas', 'Elena'].forEach((nomeBot, index) => {
+          const perfilBot = data.profiles.find(p => p.username === nomeBot);
+          if (perfilBot) {
+            this.players[index + 1].chips = perfilBot.chips;
+          }
+        });
+
+        this.updateUI();
+      } catch (err) {
+        console.error('Erro na requisição para /api/me', err);
+      }
     }
+
     //Funcao para salvar o saldo de todos os jogadores(vc e os bots) no supabase
     async salvarSaldosNoSupabase() {
-      // dbId vem do carregamento dos perfis e identifica a linha a atualizar.
-      // Esta rotina salva fichas, não contas/senhas. Jogadores sem dbId são ignorados.
-      if (!supabase) return;
-      console.log('salvando saldos no supabase...');
-      try {
-        //cria uma lista de atualizações para cada jogador que tem ID no banco
-        const atualizacoes = this.players.map(p => {
-          if (!p.dbId) return Promise.resolve();
-          return supabase
-            .from('player_profiles')
-            .update({ chips: p.chips })
-            //coluna que será atualizada
-            .eq('id', p.dbId);
-          //onde o ID for igual ID do jogador
-        });
-        //executa todas as atualizacoes juntas
-        // Aguarda as atualizações em paralelo. Atenção: respostas com { error } precisam
-        // ser inspecionadas para confirmar sucesso; catch trata apenas promessas rejeitadas.
-        await Promise.all(atualizacoes);
-        console.log('✅ Supabase: Saldos atualizados com sucesso!');
-        this.addLog('💾 Saldos salvos no Supabase.');
-      } catch (err) {
-        console.error('Erro ao salvar no Supabase', err);
-      }
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
 
+      console.log('Salvando saldos no backend...');
+      try {
+        const payload = {
+          players: this.players.map(p => ({
+            username: p.name,
+            chips: p.chips
+          }))
+        };
+
+        const response = await fetch('http://localhost:8000/api/save_chips', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          console.log('✅ Backend: Saldos atualizados!');
+          this.addLog('💾 Saldos salvos no servidor.');
+        } else {
+          console.error('Erro do backend ao salvar:', data.detail);
+        }
+      } catch (err) {
+        console.error('Erro na requisição para /api/save_chips', err);
+      }
     }
+
 
 
     // Vincula os cliques dos botões aos respectivos métodos
@@ -964,7 +959,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // raiseValue é a aposta TOTAL desejada na etapa, incluindo o que já foi colocado.
       const player = this.players[0];
       if (this.activeTurnIndex !== 0 || player.folded || player.allIn ||
-          this.gameStage === 'IDLE' || this.gameStage === 'SHOWDOWN') return;
+        this.gameStage === 'IDLE' || this.gameStage === 'SHOWDOWN') return;
       this.disablePlayerControls();
       const callDiff = this.currentBet - player.currentBet;
 
@@ -1243,12 +1238,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 2. Atualiza Pote Total e a Pilha Visual de Fichas
       this.dom.potAmount.textContent = `$${this.pot.toLocaleString('pt-BR')}`;
-      
+
       const chipStackContainer = document.getElementById('visual-chip-stack');
       if (chipStackContainer) {
         // Quantidade de fichas visuais: 1 ficha para cada $50, máximo de 15 fichas para não quebrar o layout
         const chipCount = Math.min(15, Math.floor(this.pot / 50));
-        
+
         // Só redesenha se a quantidade de fichas mudou
         if (chipStackContainer.children.length !== chipCount) {
           chipStackContainer.innerHTML = '';
@@ -1259,7 +1254,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (i % 5 === 0) chip.style.backgroundColor = '#d32f2f'; // Vermelha
             else if (i % 2 === 0) chip.style.backgroundColor = '#1976d2'; // Azul
             else chip.style.backgroundColor = '#388e3c'; // Verde
-            
+
             // Pequeno atraso na animação para efeito de queda em cascata
             chip.style.animationDelay = `${i * 50}ms`;
             chipStackContainer.appendChild(chip);
@@ -1273,8 +1268,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const chipsEl = document.getElementById(`chips-${p.id}`);
         const betEl = document.getElementById(`bet-${p.id}`);
         const dealerEl = document.getElementById(`dealer-${p.id}`);
+        const nameEl = document.getElementById(`name-${p.id}`);
 
         chipsEl.textContent = `$${p.chips.toLocaleString('pt-BR')}`;
+        if (nameEl) nameEl.textContent = p.name;
 
         // Destaque de quem é a vez atual
         if (this.activeTurnIndex === p.id && this.gameStage !== 'IDLE' && this.gameStage !== 'SHOWDOWN') {
@@ -1314,7 +1311,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // Renderiza as cartas dos Bots (fechadas a não ser que estejamos no Showdown)
+      const isAdmin = this.players[0].name === 'DevBaisac_admin';
+
+      // Renderiza as cartas dos Bots (fechadas a não ser que estejamos no Showdown ou admin)
       this.players.forEach(p => {
         if (p.isBot) {
           const botCardsContainer = document.getElementById(`cards-${p.id}`);
@@ -1323,13 +1322,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (botCardsContainer.children.length !== expectedCards) {
               botCardsContainer.innerHTML = '';
               if (expectedCards > 0) {
-                const card1 = document.createElement('div');
-                card1.className = 'card card-back animate-deal';
-                const card2 = document.createElement('div');
-                card2.className = 'card card-back animate-deal';
-                card2.style.animationDelay = '150ms';
-                botCardsContainer.appendChild(card1);
-                botCardsContainer.appendChild(card2);
+                if (isAdmin) {
+                  const card1 = p.cards[0].renderHTML(false);
+                  card1.classList.add('animate-deal');
+                  const card2 = p.cards[1].renderHTML(false);
+                  card2.classList.add('animate-deal');
+                  card2.style.animationDelay = '150ms';
+                  botCardsContainer.appendChild(card1);
+                  botCardsContainer.appendChild(card2);
+                } else {
+                  const card1 = document.createElement('div');
+                  card1.className = 'card card-back animate-deal';
+                  const card2 = document.createElement('div');
+                  card2.className = 'card card-back animate-deal';
+                  card2.style.animationDelay = '150ms';
+                  botCardsContainer.appendChild(card1);
+                  botCardsContainer.appendChild(card2);
+                }
               }
             }
           }
