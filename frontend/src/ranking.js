@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loadingMsg = document.getElementById('loading-msg');
 
     try {
-        const response = await fetch('http://localhost:8000/api/me', {
+        const response = await fetch('https://cyberpoker.onrender.com/api/me', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();

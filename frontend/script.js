@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!token) return;
 
       try {
-        const response = await fetch('http://localhost:8000/api/me', {
+        const response = await fetch('https://cyberpoker.onrender.com/api/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -565,7 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }))
         };
 
-        const response = await fetch('http://localhost:8000/api/save_chips', {
+        const response = await fetch('https://cyberpoker.onrender.com/api/save_chips', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
